@@ -7,7 +7,9 @@ import config.m.ServerConfiguration;
 import core.v.MainWindow;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.File;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -75,6 +77,7 @@ public class ConfigurationWindow extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jFileChooser1 = new javax.swing.JFileChooser();
         jLabel1 = new javax.swing.JLabel();
         pConnectionSettings = new javax.swing.JPanel();
         lServerName = new javax.swing.JLabel();
@@ -157,6 +160,11 @@ public class ConfigurationWindow extends javax.swing.JDialog {
         lKeyPath.setMinimumSize(new java.awt.Dimension(120, 20));
 
         bKeyPath.setText("...");
+        bKeyPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bKeyPathActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pConnectionSettingsLayout = new javax.swing.GroupLayout(pConnectionSettings);
         pConnectionSettings.setLayout(pConnectionSettingsLayout);
@@ -251,6 +259,11 @@ public class ConfigurationWindow extends javax.swing.JDialog {
         lIPListPath.setMinimumSize(new java.awt.Dimension(120, 20));
 
         bIPListPath.setText("...");
+        bIPListPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bIPListPathActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pToolsSettingsLayout = new javax.swing.GroupLayout(pToolsSettings);
         pToolsSettings.setLayout(pToolsSettingsLayout);
@@ -368,12 +381,39 @@ public class ConfigurationWindow extends javax.swing.JDialog {
         tfKeyPath.setEnabled(selectedMode != null && selectedMode.equals(AuthenticationMode.PRIVATE_KEY));
     }//GEN-LAST:event_cbAuthenticationModeActionPerformed
 
+    private void bKeyPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bKeyPathActionPerformed
+        // TODO add your handling code here:
+        int returnVal = jFileChooser1.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            //This is where a real application would open the file.
+            tfKeyPath.setText(file.getPath());
+        } else {
+            
+        }
+    }//GEN-LAST:event_bKeyPathActionPerformed
+
+    private void bIPListPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bIPListPathActionPerformed
+        // TODO add your handling code here:
+        int returnVal = jFileChooser1.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            //This is where a real application would open the file.
+            tfIPListPath.setText(file.getPath());
+        } else {
+            
+        }
+    }//GEN-LAST:event_bIPListPathActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bIPListPath;
     private javax.swing.JButton bKeyPath;
     private javax.swing.JButton bSave;
     private javax.swing.JComboBox cbAuthenticationMode;
+    private javax.swing.JFileChooser jFileChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lAuthenticationMode;
     private javax.swing.JLabel lGeoIPPath;
