@@ -4,7 +4,7 @@ package config.m;
  *
  * @author mrkaczor
  */
-public class ResourcesConfiguration {
+public class ResourcesConfiguration implements Cloneable {
     
     private String _hostsListFilePath;
     private String _geoIPPath;
@@ -43,5 +43,13 @@ public class ResourcesConfiguration {
         _hostmapPath = hostmapPath;
     }
 
-    
+    @Override
+    public ResourcesConfiguration clone() {
+        ResourcesConfiguration config = new ResourcesConfiguration();
+        config.setHostsListFilePath(_hostsListFilePath);
+        config.setGeoIPPath(_geoIPPath);
+        config.setHostmapPath(_hostmapPath);
+        config.setResultsPath(_resultsPath);
+        return config;
+    }
 }

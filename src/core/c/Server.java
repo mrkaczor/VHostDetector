@@ -18,9 +18,9 @@ import java.io.OutputStream;
  */
 public class Server {
 
-    private ServerConfiguration _configuration;
+    Connection _connection;
+    Session _session;
     private boolean _connectionClosed;
-    OutputStream _stdin;
     InputStream _stderr;
     InputStream _stdout;
 
@@ -28,150 +28,66 @@ public class Server {
         _connectionClosed = true;
     }
 
-    private String generateConnesctionString() {
-        String command = "ssh ";
-        command += _configuration.getLogin();
-        command += "@";
-        command += _configuration.getHost();
-        return command;
-    }
-    
-    public void refreshConfiguration() {
-        _configuration = ConfigurationService.getInstance().getServerConfiguration();
-    }
-
-    public ServerConfiguration getCurrentConfiguration() {
-        return _configuration;
-    }
-
     public boolean connect() {
-        try {
-            String line;
-            OutputStream stdin = null;
-            InputStream stderr = null;
-            InputStream stdout = null;
+        ServerConfiguration configuration = ConfigurationService.getInstance().getServerConfiguration();
+        String line;
+        
+        if(configuration != null && _connectionClosed) {
+            try {
+                _connection = new Connection(configuration.getHost());
+                _connection.connect();
 
-            System.out.println("Trying to connect: " + generateConnesctionString());
-
-            Connection conn = new Connection(_configuration.getHost());
-            conn.connect();
-            if(conn.authenticateWithPublicKey(_configuration.getLogin(), new File("C:/Users/mrkaczor/Documents/GitHub/VHostDetector/res/id_rsa"), _configuration.getPassword())) {
-                Session sess = conn.openSession();
-
-                sess.execCommand("pwd");
-                _stdout = new StreamGobbler(sess.getStdout());
-                _stderr = new StreamGobbler(sess.getStderr());
-                
-                BufferedReader brCleanUp =
-                        new BufferedReader(new InputStreamReader(_stdout));
-                while ((line = brCleanUp.readLine()) != null) {
-                    System.err.println("[Stdout] " + line);
+                switch(configuration.getAuthenticationMode()) {
+                    case PASSWORD:
+                        _connectionClosed = !_connection.authenticateWithPassword(configuration.getLogin(), configuration.getPassword());
+                        break;
+                    case PRIVATE_KEY:
+                        _connectionClosed = !_connection.authenticateWithPublicKey(configuration.getLogin(), new File(configuration.getKeyPath()), configuration.getPassword());
+                        break;
+                    default:
+                        _connectionClosed = true;
                 }
-                brCleanUp.close();
 
-                brCleanUp =
-                        new BufferedReader(new InputStreamReader(_stderr));
-                while ((line = brCleanUp.readLine()) != null) {
-                    System.err.println("[Stderr] " + line);
+                if(!_connectionClosed) {
+                    _session = _connection.openSession();
+
+                    _stdout = new StreamGobbler(_session.getStdout());
+                    _stderr = new StreamGobbler(_session.getStderr());
+
+                    BufferedReader brCleanUp =
+                            new BufferedReader(new InputStreamReader(_stdout));
+                    while ((line = brCleanUp.readLine()) != null) {
+                        System.err.println("[Stdout] " + line);
+                    }
+                    brCleanUp.close();
+
+                    brCleanUp =
+                            new BufferedReader(new InputStreamReader(_stderr));
+                    while ((line = brCleanUp.readLine()) != null) {
+                        System.err.println("[Stderr] " + line);
+                    }
+                    brCleanUp.close();                    
                 }
-                brCleanUp.close();
-                
-                sess.close();
+            } catch (IOException ex) {
+                System.err.println(ex.getMessage());
             }
-            conn.close();
-            
-            /*
-            
-            // launch EXE and grab stdin/stdout and stderr
-            Process process = Runtime.getRuntime().exec("cmd /C C:\\Progra~2\\Git\\bin\\sh.exe");
-            
-            stdin = process.getOutputStream();
-            stderr = process.getErrorStream();
-            stdout = process.getInputStream();
-
-            
-            // "write" the parms into stdin
-//            line = "sh\n";
-//            stdin.write(line.getBytes());
-//            stdin.flush();
-//
-            line = "ssh";
-            stdin.write(line.getBytes());
-            stdin.flush();
-
-            stdin.close();
-            
-            
-            // clean up if any output in stdout
-            BufferedReader brCleanUp =
-                    new BufferedReader(new InputStreamReader(stdout));
-            System.out.println("\nOUTPUT:");
-            while ((line = brCleanUp.readLine()) != null) {
-                System.out.println ("[Stdout] " + line);
-            }
-            brCleanUp.close();
-
-            // clean up if any output in stderr
-            brCleanUp =
-                    new BufferedReader(new InputStreamReader(stderr));
-            System.out.println("\nERRORS:");
-            while ((line = brCleanUp.readLine()) != null) {
-                System.out.println ("[Stderr] " + line);
-            }
-            brCleanUp.close();
-
-            return true;
-            /*
-            
-            
-             if(_configuration != null && _connectionClosed) {
-             Process process;
-             try {
-             System.out.println("Trying to connect: "+generateConnesctionString());
-             process = Runtime.getRuntime().exec(generateConnesctionString());
-             _stdin = process.getOutputStream();
-             _stderr = process.getErrorStream();
-             _stdout = process.getInputStream();
-                    
-             //////
-             String line;
-             BufferedReader brCleanUp =
-             new BufferedReader(new InputStreamReader(_stdout));
-             while ((line = brCleanUp.readLine()) != null) {
-             //System.out.println ("[Stdout] " + line);
-             }
-             brCleanUp.close();
-
-             // clean up if any output in stderr
-             brCleanUp =
-             new BufferedReader(new InputStreamReader(_stderr));
-             while ((line = brCleanUp.readLine()) != null) {
-             System.err.println ("[Stderr] " + line);
-             }
-             brCleanUp.close();
-             //////
-                    
-             _stdin.close();
-             _stdout.close();
-             _stderr.close();
-                    
-             _connectionClosed = false;
-             } catch (IOException ex) {
-             return false;
-             }
-             return true;
-             }
-             return false;
-             */
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
         }
         return false;
     }
 
+    public void executeCommand(String command) {
+        try {
+            _session.execCommand(command);
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+    
     public boolean disconnect() {
-        if (_configuration != null && !_connectionClosed) {
-
+        if (_connection != null && !_connectionClosed) {
+            _session.close();
+            _connection.close();
+            _connection = null;
             _connectionClosed = true;
             return true;
         }

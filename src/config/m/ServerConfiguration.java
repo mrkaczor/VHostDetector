@@ -57,7 +57,7 @@ public class ServerConfiguration implements Cloneable {
     }
 
     public String getKeyPath() {
-        return _password;
+        return _keyPath;
     }
 
     @Override
@@ -66,6 +66,7 @@ public class ServerConfiguration implements Cloneable {
         conf.setName(_name);
         conf.setHost(_host);
         conf.setLogin(_login);
+        conf.setAuthenticationMode(_authMode);
         conf.setPassword(_password);
         conf.setKeyPath(_keyPath);
         return conf;

@@ -1,19 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package core.v;
 
 import config.v.ConfigurationWindow;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import javax.swing.JFrame;
 
 /**
  *
  * @author mrkaczor
  */
-public class MainWindow extends javax.swing.JFrame {
-
+public class MainWindow extends JFrame {
     
     public static MainWindow getInstance() {
         return MainWindowHolder.INSTANCE;
