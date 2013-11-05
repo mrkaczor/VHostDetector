@@ -3,6 +3,7 @@ package core.c;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
+import config.c.ConfigurationService;
 import config.m.ServerConfiguration;
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,8 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -36,13 +35,13 @@ public class Server {
         command += _configuration.getHost();
         return command;
     }
-
-    public ServerConfiguration getConfiguration() {
-        return _configuration;
+    
+    public void refreshConfiguration() {
+        _configuration = ConfigurationService.getInstance().getServerConfiguration();
     }
 
-    public void loadConfiguration(ServerConfiguration config) {
-        _configuration = config;
+    public ServerConfiguration getCurrentConfiguration() {
+        return _configuration;
     }
 
     public boolean connect() {

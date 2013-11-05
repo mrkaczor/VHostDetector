@@ -1,5 +1,6 @@
 package core.c;
 
+import config.c.ConfigurationService;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
 
@@ -19,8 +20,9 @@ public class Main {
         conf.setPassword("wanat5");
         
         Server srv = new Server();
-        srv.loadConfiguration(conf);
+        ConfigurationService.getInstance().updateServerConfiguration(conf);
         
+        srv.refreshConfiguration();
         srv.connect();
         
         MainWindow.getInstance().setVisible(true);
