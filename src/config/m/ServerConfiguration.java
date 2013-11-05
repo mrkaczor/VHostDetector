@@ -10,25 +10,30 @@ public class ServerConfiguration implements Cloneable {
     private String _login;
     private String _password;
     private AuthenticationMode _authMode;
+    private String _keyPath;
 
-    public void setName(String _name) {
-        this._name = _name;
+    public void setName(String name) {
+        this._name = name;
     }
 
-    public void setHost(String _host) {
-        this._host = _host;
+    public void setHost(String host) {
+        this._host = host;
     }
 
-    public void setLogin(String _login) {
-        this._login = _login;
+    public void setLogin(String login) {
+        this._login = login;
     }
 
-    public void setPassword(String _password) {
-        this._password = _password;
+    public void setPassword(String password) {
+        this._password = password;
     }
     
     public void setAuthenticationMode(AuthenticationMode mode) {
         _authMode = mode;
+    }
+
+    public void setKeyPath(String keyPath) {
+        this._keyPath = keyPath;
     }
 
     public String getName() {
@@ -51,6 +56,10 @@ public class ServerConfiguration implements Cloneable {
         return _authMode;
     }
 
+    public String getKeyPath() {
+        return _password;
+    }
+
     @Override
     public ServerConfiguration clone() {
         ServerConfiguration conf = new ServerConfiguration();
@@ -58,6 +67,19 @@ public class ServerConfiguration implements Cloneable {
         conf.setHost(_host);
         conf.setLogin(_login);
         conf.setPassword(_password);
+        conf.setKeyPath(_keyPath);
         return conf;
+    }
+    
+    @Override
+    public String toString() {
+        String result = "["+super.toString()+"]\n";
+        result += "[Name]\t"+_name+"\n";
+        result += "[Host]\t"+_host+"\n";
+        result += "[Mode]\t"+_authMode+"\n";
+        result += "[User]\t"+_login+"\n";
+        result += "[Pass]\t"+_password+"\n";
+        result += "[Key]\t"+_keyPath;
+        return result;
     }
 }

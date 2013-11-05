@@ -4,6 +4,8 @@ import config.c.ConfigurationService;
 import config.m.AuthenticationMode;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -27,8 +29,35 @@ public class ConfigurationWindow extends javax.swing.JDialog {
      */
     private ConfigurationWindow() {
         super(MainWindow.getInstance(), "Ustawienia", true);
-        _configuration = ConfigurationService.getInstance().getServerConfiguration().clone();
         initComponents();
+        refreshConfiguration();
+    }
+    
+    private void refreshConfiguration() {
+        _configuration = ConfigurationService.getInstance().getServerConfiguration().clone();
+        
+        tfServerName.setText(_configuration.getName()==null?"":_configuration.getName());
+        tfHostName.setText(_configuration.getHost()==null?"":_configuration.getHost());
+        cbAuthenticationMode.setSelectedItem(_configuration.getAuthenticationMode());
+        tfUserName.setText(_configuration.getLogin()==null?"":_configuration.getLogin());
+        pfPassword.setText(_configuration.getPassword()==null?"":_configuration.getPassword());
+        tfKeyPath.setText(_configuration.getKeyPath()==null?"":_configuration.getKeyPath());
+    }
+    
+    private void updateConfiguration() {
+        _configuration.setName(tfServerName.getText());
+        _configuration.setHost(tfHostName.getText());
+        _configuration.setLogin(tfUserName.getText());
+        _configuration.setAuthenticationMode(AuthenticationMode.getByName(cbAuthenticationMode.getSelectedItem().toString()));
+        System.out.println("MODE:\n"+(AuthenticationMode)cbAuthenticationMode.getSelectedItem());
+        _configuration.setPassword(pfPassword.getText());
+        _configuration.setKeyPath(tfKeyPath.getText());
+    }
+    
+    @Override
+    public void setVisible(boolean visibility) {
+        refreshConfiguration();
+        super.setVisible(visibility);
     }
 
     @SuppressWarnings("unchecked")
@@ -81,12 +110,7 @@ public class ConfigurationWindow extends javax.swing.JDialog {
         lAuthenticationMode.setMaximumSize(new java.awt.Dimension(120, 20));
         lAuthenticationMode.setMinimumSize(new java.awt.Dimension(120, 20));
 
-        tfServerName.setText(_configuration.getName()==null?"":_configuration.getName());
-
-        tfHostName.setText(_configuration.getHost()==null?"":_configuration.getHost());
-
         cbAuthenticationMode.setModel(new DefaultComboBoxModel(AuthenticationMode.values()));
-        cbAuthenticationMode.setSelectedItem(_configuration.getAuthenticationMode());
 
         lUserName.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -94,15 +118,11 @@ public class ConfigurationWindow extends javax.swing.JDialog {
         lUserName.setMaximumSize(new java.awt.Dimension(120, 20));
         lUserName.setMinimumSize(new java.awt.Dimension(120, 20));
 
-        tfUserName.setText(_configuration.getLogin()==null?"":_configuration.getLogin());
-
         lPassword.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lPassword.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lPassword.setText("Hasło:");
         lPassword.setMaximumSize(new java.awt.Dimension(120, 20));
         lPassword.setMinimumSize(new java.awt.Dimension(120, 20));
-
-        pfPassword.setText(_configuration.getPassword()==null?"":_configuration.getPassword());
 
         lKeyPath.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lKeyPath.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -124,14 +144,6 @@ public class ConfigurationWindow extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(tfServerName))
                     .addGroup(pConnectionSettingsLayout.createSequentialGroup()
-                        .addComponent(lAuthenticationMode, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cbAuthenticationMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(pConnectionSettingsLayout.createSequentialGroup()
-                        .addComponent(lHostName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(tfHostName))
-                    .addGroup(pConnectionSettingsLayout.createSequentialGroup()
                         .addComponent(lUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(tfUserName))
@@ -144,7 +156,15 @@ public class ConfigurationWindow extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(tfKeyPath)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(bKeyPath, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(bKeyPath, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pConnectionSettingsLayout.createSequentialGroup()
+                        .addGroup(pConnectionSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lAuthenticationMode, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lHostName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(pConnectionSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tfHostName)
+                            .addComponent(cbAuthenticationMode, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         pConnectionSettingsLayout.setVerticalGroup(
@@ -243,6 +263,7 @@ public class ConfigurationWindow extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveActionPerformed
+        updateConfiguration();
         ConfigurationService.getInstance().updateServerConfiguration(_configuration);
         this.dispose();
     }//GEN-LAST:event_bSaveActionPerformed
