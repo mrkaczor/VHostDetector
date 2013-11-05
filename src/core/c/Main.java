@@ -3,6 +3,7 @@ package core.c;
 import config.c.ConfigurationService;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
+import hosts.c.HostsService;
 
 /**
  *
@@ -21,6 +22,10 @@ public class Main {
         
         Server srv = new Server();
         ConfigurationService.getInstance().updateServerConfiguration(conf);
+        ConfigurationService.getInstance().getResourcesConfiguration().setGeoIPPath("~/GeoIP");
+        ConfigurationService.getInstance().getResourcesConfiguration().setHostmapPath("~/hostmap");
+        ConfigurationService.getInstance().getResourcesConfiguration().setResultsPath("~/results");
+                        
         
         srv.refreshConfiguration();
         srv.connect();
@@ -30,5 +35,7 @@ public class Main {
         System.out.println("SIEMANO");
         
         srv.disconnect();
+        
+        System.out.println(HostsService.generateIPLookupCommand("212.77.100.101", 0));
     }
 }

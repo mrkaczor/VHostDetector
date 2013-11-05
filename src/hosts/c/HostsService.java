@@ -5,6 +5,8 @@
  */
 package hosts.c;
 
+import config.c.ConfigurationService;
+import config.m.ResourcesConfiguration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,10 +48,25 @@ public class HostsService {
     }
 
     public static String generateIPLookupCommand(String IPAddress, int timeout) {
+        ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
+        String geoIP = config.getGeoIPPath();
+        String hostmap = config.getHostmapPath();
+        String results = config.getResultsPath();
+
         if (timeout > 0) {
-            return String.format("cd ~/GeoIP/ && ./IPtoLocation.pl %1$s > ~/results/%1$s && cd && timeout %2$ds ruby ~/hostmap/hostmap.rb -t %1$s >> ~/results/%1$s && echo %1$s >> ~/results/completed", IPAddress, timeout);
+            return String.format("cd %3$s/ "
+                    + "&& ./IPtoLocation.pl %1$s > %5$s/%1$s "
+                    + "&& cd "
+                    + "&& timeout %2$ds ruby %4$s/hostmap.rb -t %1$s >> %5$s/%1$s "
+                    + "&& echo %1$s >> %5$s/completed",
+                    IPAddress, timeout, geoIP, hostmap, results);
         } else {
-            return String.format("cd ~/GeoIP/ && ./IPtoLocation.pl %1$s > ~/results/%1$s && cd && ruby ~/hostmap/hostmap.rb -t %1$s >> ~/results/%1$s && echo %1$s >> ~/results/completed", IPAddress);
+            return String.format("cd %2$s/ "
+                    + "&& ./IPtoLocation.pl %1$s > %4$s/%1$s "
+                    + "&& cd "
+                    + "&& ruby %3$s/hostmap.rb -t %1$s >> %4$s/%1$s "
+                    + "&& echo %1$s >> %4$s/completed",
+                    IPAddress, geoIP, hostmap, results);
         }
     }
 }
