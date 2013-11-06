@@ -24,9 +24,14 @@ public class Main {
         
         MainWindow.getInstance().setVisible(true);
         
+        srv.executeCommand("cd ~/GeoIP/ && pwd && perl IPtoLocation.pl 212.77.100.101 > a2.txt");
+//        srv.executeCommand("pwd");
+//        srv.executeCommand("./IPtoLocation.pl 212.77.100.101");
+//        srv.executeCommand("cd");
+        
         srv.disconnect();
         
-        System.out.println(HostsService.generateIPLookupCommand("212.77.100.101", 0));
+        //System.out.println(HostsService.generateIPLookupCommand("212.77.100.101", 0));
     }
     
     private static void initDefaultConfiguration() {
@@ -36,7 +41,7 @@ public class Main {
         conf.setLogin("mjanik");
         conf.setAuthenticationMode(AuthenticationMode.PRIVATE_KEY);
         conf.setPassword("wanat5");
-        conf.setKeyPath("/res/id_rsa");
+        conf.setKeyPath("res/id_rsa");
         ConfigurationService.getInstance().updateServerConfiguration(conf);
         
         ConfigurationService.getInstance().getResourcesConfiguration().setGeoIPPath("~/GeoIP");

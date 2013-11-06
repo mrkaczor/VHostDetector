@@ -369,6 +369,7 @@ public class ConfigurationWindow extends javax.swing.JDialog {
     private void bSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveActionPerformed
         updateConfiguration();
         ConfigurationService.getInstance().updateServerConfiguration(_configuration);
+        ConfigurationService.getInstance().updateResourcesConfiguration(_paths);
         this.dispose();
     }//GEN-LAST:event_bSaveActionPerformed
 

@@ -1,6 +1,7 @@
 package core.v;
 
 import config.v.ConfigurationWindow;
+import hosts.c.HostsService;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.JFrame;
@@ -39,7 +40,7 @@ public class MainWindow extends JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         bConfiguration = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        bDetectHosts = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("VHostDetector v1.0");
@@ -56,8 +57,13 @@ public class MainWindow extends JFrame {
             }
         });
 
-        jButton2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton2.setText("Wykryj hosty");
+        bDetectHosts.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        bDetectHosts.setText("Wykryj hosty");
+        bDetectHosts.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bDetectHostsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -70,7 +76,7 @@ public class MainWindow extends JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bDetectHosts, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(bConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -83,7 +89,7 @@ public class MainWindow extends JFrame {
                 .addGap(30, 30, 30)
                 .addComponent(bConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(bDetectHosts, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(61, Short.MAX_VALUE))
         );
 
@@ -94,9 +100,13 @@ public class MainWindow extends JFrame {
         ConfigurationWindow.getInstance().setVisible(true);
     }//GEN-LAST:event_bConfigurationActionPerformed
 
+    private void bDetectHostsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDetectHostsActionPerformed
+        HostsService.getInstance().detectVirtualHosts();
+    }//GEN-LAST:event_bDetectHostsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bConfiguration;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton bDetectHosts;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

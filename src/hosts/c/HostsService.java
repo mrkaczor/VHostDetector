@@ -1,53 +1,52 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hosts.c;
 
 import config.c.ConfigurationService;
 import config.m.ResourcesConfiguration;
+import hosts.m.HostsHolder;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
  * @author Mateusz
  */
 public class HostsService {
+    
+    private HostsHolder _initialHosts;
 
-    private HostsService() {
-
-    }
-
+    // <editor-fold defaultstate="collapsed" desc="Creating object">
+    // <editor-fold defaultstate="collapsed" desc="Singleton">
     public static HostsService getInstance() {
         return HostsServiceHolder.INSTANCE;
     }
 
     private static class HostsServiceHolder {
-
         private static final HostsService INSTANCE = new HostsService();
     }
-
-    public static List<String> readIPs(String filePath) throws FileNotFoundException, IOException {
-        List<String> result = new LinkedList<>();
-
-        BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
-        String line = br.readLine();
-        while (line != null) {
-            result.add(line);
-            line = br.readLine();
+    // </editor-fold>
+    
+    private HostsService() {
+        _initialHosts = new HostsHolder();
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
+    private void readHostsIPs() {
+        String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                _initialHosts.addIPAddress(line);
+            }
+        } catch(IOException ex) {
+            System.err.println("Unable to load servers data from given directory due to exception:\n"+ex.getMessage());
         }
-
-        return result;
     }
 
-    public static String generateIPLookupCommand(String IPAddress, int timeout) {
+    private String generateIPLookupCommand(String IPAddress, int timeout) {
         ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
         String geoIP = config.getGeoIPPath();
         String hostmap = config.getHostmapPath();
@@ -69,4 +68,16 @@ public class HostsService {
                     IPAddress, geoIP, hostmap, results);
         }
     }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
+    public void detectVirtualHosts() {
+        readHostsIPs();
+        System.out.println("SUCCESSFULLY loaded "+_initialHosts.getServersCount()+" servers!");
+        for(String IPAddress : _initialHosts.getIPAddresses()) {
+            System.out.println(generateIPLookupCommand(IPAddress, 600));
+        }
+    }
+    // </editor-fold>
+    
 }

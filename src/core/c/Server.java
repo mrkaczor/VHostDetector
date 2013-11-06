@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -19,13 +21,32 @@ import java.io.OutputStream;
 public class Server {
 
     Connection _connection;
-    Session _session;
     private boolean _connectionClosed;
     InputStream _stderr;
     InputStream _stdout;
 
     public Server() {
         _connectionClosed = true;
+    }
+    
+    private void readStreams() {
+        try {
+            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stdout));
+            String line;
+            
+            while ((line = brCleanUp.readLine()) != null) {
+                System.err.println("[Stdout] " + line);
+            }
+            brCleanUp.close();
+
+            brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
+            while ((line = brCleanUp.readLine()) != null) {
+                System.err.println("[Stderr] " + line);
+            }
+            brCleanUp.close();
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 
     public boolean connect() {
@@ -49,24 +70,9 @@ public class Server {
                 }
 
                 if(!_connectionClosed) {
-                    _session = _connection.openSession();
-
-                    _stdout = new StreamGobbler(_session.getStdout());
-                    _stderr = new StreamGobbler(_session.getStderr());
-
-                    BufferedReader brCleanUp =
-                            new BufferedReader(new InputStreamReader(_stdout));
-                    while ((line = brCleanUp.readLine()) != null) {
-                        System.err.println("[Stdout] " + line);
-                    }
-                    brCleanUp.close();
-
-                    brCleanUp =
-                            new BufferedReader(new InputStreamReader(_stderr));
-                    while ((line = brCleanUp.readLine()) != null) {
-                        System.err.println("[Stderr] " + line);
-                    }
-                    brCleanUp.close();                    
+                    System.out.println("SUCCESSFULLY CONNECTED!");
+                              
+                    executeCommand("pwd");
                 }
             } catch (IOException ex) {
                 System.err.println(ex.getMessage());
@@ -76,8 +82,14 @@ public class Server {
     }
 
     public void executeCommand(String command) {
+        Session session;
         try {
-            _session.execCommand(command);
+            session = _connection.openSession();
+            session.execCommand(command);
+            _stdout = new StreamGobbler(session.getStdout());
+            _stderr = new StreamGobbler(session.getStderr());
+            session.close();
+            readStreams();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
@@ -85,7 +97,6 @@ public class Server {
     
     public boolean disconnect() {
         if (_connection != null && !_connectionClosed) {
-            _session.close();
             _connection.close();
             _connection = null;
             _connectionClosed = true;
