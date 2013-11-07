@@ -1,10 +1,10 @@
 package core.c;
 
+import server.c.Server;
 import config.c.ConfigurationService;
 import config.m.AuthenticationMode;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
-import hosts.c.HostsService;
 
 /**
  *
@@ -19,17 +19,17 @@ public class Main {
         
         initDefaultConfiguration();
         
-        Server srv = new Server();
-        srv.connect();
+        //Server srv = Server.getInstance();
+        //srv.connect();
         
         MainWindow.getInstance().setVisible(true);
         
-        srv.executeCommand("cd ~/GeoIP/ && pwd && perl IPtoLocation.pl 212.77.100.101 > a2.txt");
+//        srv.executeCommand("cd ~/GeoIP/ && pwd && perl IPtoLocation.pl 212.77.100.101 > a2.txt");
 //        srv.executeCommand("pwd");
 //        srv.executeCommand("./IPtoLocation.pl 212.77.100.101");
 //        srv.executeCommand("cd");
         
-        srv.disconnect();
+        //srv.disconnect();
         
         //System.out.println(HostsService.generateIPLookupCommand("212.77.100.101", 0));
     }

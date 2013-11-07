@@ -60,6 +60,17 @@ public class ServerConfiguration implements Cloneable {
         return _keyPath;
     }
 
+    public boolean isValid() {
+        if(_host!=null && !_host.equals("") && _password!=null && !_password.equals("")) {
+            if(_authMode.equals(AuthenticationMode.PASSWORD) && _login!=null && !_login.equals("")) {
+                return true;
+            } else if(_authMode.equals(AuthenticationMode.PRIVATE_KEY) && _keyPath!=null && !_keyPath.equals("")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public ServerConfiguration clone() {
         ServerConfiguration conf = new ServerConfiguration();

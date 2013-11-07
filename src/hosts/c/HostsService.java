@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import server.c.Server;
+import server.m.Console;
 
 /**
  *
@@ -33,17 +35,23 @@ public class HostsService {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
-    private void readHostsIPs() {
+    private boolean readHostsIPs() {
         String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
-            String line;
-            while ((line = br.readLine()) != null) {
-                _initialHosts.addIPAddress(line);
+        if(filePath != null && !filePath.equals("")) {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    _initialHosts.addIPAddress(line);
+                }
+                return true;
+            } catch(IOException ex) {
+                System.err.println("Unable to load servers data from given directory due to exception:\n"+ex.getMessage());
             }
-        } catch(IOException ex) {
-            System.err.println("Unable to load servers data from given directory due to exception:\n"+ex.getMessage());
+        } else {
+            Server.getInstance().log(Console.ERROR, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
         }
+        return false;
     }
 
     private String generateIPLookupCommand(String IPAddress, int timeout) {
@@ -72,10 +80,11 @@ public class HostsService {
     
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
     public void detectVirtualHosts() {
-        readHostsIPs();
-        System.out.println("SUCCESSFULLY loaded "+_initialHosts.getServersCount()+" servers!");
-        for(String IPAddress : _initialHosts.getIPAddresses()) {
-            System.out.println(generateIPLookupCommand(IPAddress, 600));
+        if(readHostsIPs()) {
+            System.out.println("SUCCESSFULLY loaded "+_initialHosts.getServersCount()+" servers!");
+            for(String IPAddress : _initialHosts.getIPAddresses()) {
+                System.out.println(generateIPLookupCommand(IPAddress, 600));
+            }
         }
     }
     // </editor-fold>
