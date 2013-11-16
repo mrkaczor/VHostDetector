@@ -4,10 +4,13 @@ import config.c.ConfigurationService;
 import server.v.ServerWindow;
 import config.v.ResourceConfigurationWindow;
 import config.v.ServerConfigurationWindow;
-import hosts.c.HostsService;
+import research.c.HostsService;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import server.c.Server;
 
 /**
@@ -40,15 +43,39 @@ public class MainWindow extends JFrame {
         _serverDetails = new ServerWindow();
         _resourceConfig = new ResourceConfigurationWindow();
         _serverConfig = new ServerConfigurationWindow();
+        WindowAdapter wa = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent we) {
+                closeApplication();
+            }
+        };
+        this.addWindowListener(wa);
         initComponents();
     }
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
+    private void closeApplication() {
+        int val = 0;
+        if(Server.getInstance().isConnected()) {
+            Object[] opt = {"TAK", "NIE"};
+            String sMessage = "Zakończenie aplikacji spowoduje rozłączenie z serwerem i utratę wszystkich niezapisanych informacji!\nCzy jesteś pewien, że chcesz zamknąć połączenie z serwerem i zakończyć aplikację?";
+            val = JOptionPane.showOptionDialog(null, sMessage, "Kończenie pracy programu", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opt, null);
+            if(val == 0) {
+                Server.getInstance().disconnect();
+            }
+        }
+        if(val == 0) {
+            dispose();
+            System.exit(0);
+        }
+    }
+
     private void refreshComponents() {
         boolean connectionState = Server.getInstance().isConnected();
         miConnection.setText(connectionState?"Rozłącz":"Połącz");
         miConnection.setEnabled(connectionState?true:ConfigurationService.getInstance().getServerConfiguration().isValid());
+        mReasearch.setEnabled(connectionState);
         miServerConfiguration.setEnabled(!connectionState);
     }
     // </editor-fold>
@@ -88,13 +115,13 @@ public class MainWindow extends JFrame {
         miServerDetails = new javax.swing.JMenuItem();
         mReasearch = new javax.swing.JMenu();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("VHostDetector v1.0");
         addWindowFocusListener(new java.awt.event.WindowFocusListener() {
+            public void windowLostFocus(java.awt.event.WindowEvent evt) {
+            }
             public void windowGainedFocus(java.awt.event.WindowEvent evt) {
                 formWindowGainedFocus(evt);
-            }
-            public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
         });
 
@@ -113,6 +140,11 @@ public class MainWindow extends JFrame {
         mFile.setText("Plik");
 
         miExit.setText("Zakończ");
+        miExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miExitActionPerformed(evt);
+            }
+        });
         mFile.add(miExit);
 
         jMenuBar1.add(mFile);
@@ -166,7 +198,7 @@ public class MainWindow extends JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(bDetectHosts, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -178,9 +210,9 @@ public class MainWindow extends JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(98, 98, 98)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
                 .addComponent(bDetectHosts, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(245, Short.MAX_VALUE))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
 
         pack();
@@ -212,12 +244,24 @@ public class MainWindow extends JFrame {
     }//GEN-LAST:event_miServerConfigurationActionPerformed
 
     private void miConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miConnectionActionPerformed
-        Server.getInstance().connect();
+        boolean operationResult;
+        if(Server.getInstance().isConnected()) {
+            operationResult = Server.getInstance().disconnect();
+        } else {
+            operationResult = Server.getInstance().connect();
+        }
+        if(operationResult) {
+            refreshComponents();
+        }
     }//GEN-LAST:event_miConnectionActionPerformed
 
     private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
         refreshComponents();
     }//GEN-LAST:event_formWindowGainedFocus
+
+    private void miExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miExitActionPerformed
+        closeApplication();
+    }//GEN-LAST:event_miExitActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bDetectHosts;

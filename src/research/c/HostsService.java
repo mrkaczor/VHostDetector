@@ -1,12 +1,13 @@
-package hosts.c;
+package research.c;
 
 import config.c.ConfigurationService;
 import config.m.ResourcesConfiguration;
-import hosts.m.HostsHolder;
+import research.m.HostsHolder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import research.m.HostModel;
 import server.c.Server;
 import server.m.Console;
 
@@ -16,7 +17,7 @@ import server.m.Console;
  */
 public class HostsService {
     
-    private HostsHolder _initialHosts;
+    private HostsHolder _hosts;
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
     // <editor-fold defaultstate="collapsed" desc="Singleton">
@@ -30,7 +31,7 @@ public class HostsService {
     // </editor-fold>
     
     private HostsService() {
-        _initialHosts = new HostsHolder();
+        _hosts = new HostsHolder();
     }
     // </editor-fold>
     
@@ -38,15 +39,19 @@ public class HostsService {
     private boolean readHostsIPs() {
         String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
         if(filePath != null && !filePath.equals("")) {
+            _hosts.getHosts().clear();
             try {
                 BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
                 String line;
+                HostModel host;
                 while ((line = br.readLine()) != null) {
-                    _initialHosts.addIPAddress(line);
+                    host = new HostModel(line);
+                    _hosts.addHost(host);
                 }
                 return true;
             } catch(IOException ex) {
-                System.err.println("Unable to load servers data from given directory due to exception:\n"+ex.getMessage());
+                Server.getInstance().log(Console.ERROR, "Wystąpił błąd podczas próby wczytania danych serwerów", true);
+                System.err.println("Wystąpił błąd podczas próby wczytania danych serwerów:\n"+ex.getMessage());
             }
         } else {
             Server.getInstance().log(Console.ERROR, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
@@ -80,12 +85,18 @@ public class HostsService {
     
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
     public void detectVirtualHosts() {
+        ResearchService.getInstance().checkResearchExist();
         if(readHostsIPs()) {
-            System.out.println("SUCCESSFULLY loaded "+_initialHosts.getServersCount()+" servers!");
-            for(String IPAddress : _initialHosts.getIPAddresses()) {
-                System.out.println(generateIPLookupCommand(IPAddress, 600));
-            }
+            ResearchService.getInstance().startResearch();
+            Server.getInstance().log(Console.SYSTEM, "Successfully loaded "+_hosts.getServersCount()+" servers data!", false);
+//            for(HostModel host : _hosts.getHosts()) {
+//                System.out.println(generateIPLookupCommand(host.getIPAddress(), 600));
+//            }
         }
+    }
+
+    public HostsHolder getHostsData() {
+        return _hosts;
     }
     // </editor-fold>
     

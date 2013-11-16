@@ -10,7 +10,8 @@ import java.util.List;
  */
 public class Console {
     public static final int MESSAGE = 0;
-    public static final int ERROR = 0;
+    public static final int ERROR = 1;
+    public static final int SYSTEM = 2;
     
     private List<LogMessage> _logs;
     
@@ -19,7 +20,7 @@ public class Console {
     }
     
     public void log(int level, String log) {
-        if(level == ERROR || level == MESSAGE) {
+        if(level == ERROR || level == MESSAGE || level == SYSTEM) {
             _logs.add(new LogMessage(Calendar.getInstance().getTime(), level, log));
         } else {
             _logs.add(new LogMessage(Calendar.getInstance().getTime(), Console.MESSAGE, log));

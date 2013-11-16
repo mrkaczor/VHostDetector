@@ -41,9 +41,10 @@ public class Main {
         conf.setLogin("mjanik");
         conf.setAuthenticationMode(AuthenticationMode.PRIVATE_KEY);
         conf.setPassword("wanat5");
-        conf.setKeyPath("res/id_rsa");
+        conf.setKeyPath("res/fourmeet");
         ConfigurationService.getInstance().updateServerConfiguration(conf);
         
+        ConfigurationService.getInstance().getResourcesConfiguration().setHostsListFilePath("res/hosts.txt");
         ConfigurationService.getInstance().getResourcesConfiguration().setGeoIPPath("~/GeoIP");
         ConfigurationService.getInstance().getResourcesConfiguration().setHostmapPath("~/hostmap");
         ConfigurationService.getInstance().getResourcesConfiguration().setResultsPath("~/results");

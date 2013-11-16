@@ -1,5 +1,6 @@
-package hosts.m;
+package research.m;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,21 +8,16 @@ import java.util.List;
  * @author Mateusz
  */
 public class HostsHolder {
-    private List<String> _IPAddresses;
     private List<HostModel> _hosts;
 
-    public List<String> getIPAddresses() {
-        return _IPAddresses;
+    public HostsHolder() {
+        _hosts = new ArrayList<>();
     }
 
-    public void setIPAddresses(List<String> IPAddresses) {
-        _IPAddresses = IPAddresses;
+    public void addHost(HostModel host){
+        _hosts.add(host);
     }
-    
-    public void addIPAddress(String IPAddress){
-        _IPAddresses.add(IPAddress);
-    }
-    
+
     public HostModel getHost(String IPAddress){
         HostModel result = null;
                 
@@ -35,10 +31,6 @@ public class HostsHolder {
         return result;
     }
     
-    public void addHost(HostModel host){
-        _hosts.add(host);
-    }
-
     public List<HostModel> getHosts() {
         return _hosts;
     }
@@ -48,6 +40,6 @@ public class HostsHolder {
     }
     
     public int getServersCount() {
-        return _IPAddresses.size();
+        return _hosts.size();
     }
 }

@@ -6,6 +6,9 @@ package config.m;
  */
 public class ResourcesConfiguration implements Cloneable {
     
+    private final String _localDataDirectory = "download/";
+    private final String _researchStateFile = "completed";
+    
     private String _hostsListFilePath;
     private String _geoIPPath;
     private String _resultsPath;
@@ -41,6 +44,14 @@ public class ResourcesConfiguration implements Cloneable {
 
     public void setHostmapPath(String hostmapPath) {
         _hostmapPath = hostmapPath;
+    }
+
+    public String getLocalDataDirectory() {
+        return _localDataDirectory;
+    }
+
+    public String getResearchStateFileName() {
+        return _researchStateFile;
     }
 
     @Override

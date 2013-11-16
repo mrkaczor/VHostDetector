@@ -40,9 +40,6 @@ public class ServerWindow extends javax.swing.JDialog {
             }
         }
         lServerHost.setText(host);
-        
-        bConnection.setText(connectionState?"Rozłącz":"Połącz");
-        bConnection.setEnabled(connectionState?true:serverConfig.isValid());
     }
     
     private String formatTime(Date time) {
@@ -61,8 +58,10 @@ public class ServerWindow extends javax.swing.JDialog {
         for(LogMessage log : logs) {
             if(log.getLevel() == Console.ERROR) {
                 taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [ERROR]  "+log.getMessage()+"\n");
-            } else {
+            } else if(log.getLevel() == Console.MESSAGE) {
                 taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [INFO]   "+log.getMessage()+"\n");
+            } else {
+                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [SYTEM]  "+log.getMessage()+"\n");
             }
         }
     }
@@ -80,7 +79,6 @@ public class ServerWindow extends javax.swing.JDialog {
 
         lServerName = new javax.swing.JLabel();
         bClose = new javax.swing.JButton();
-        bConnection = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         taConsole = new javax.swing.JTextArea();
         lServerHost = new javax.swing.JLabel();
@@ -98,14 +96,6 @@ public class ServerWindow extends javax.swing.JDialog {
         bClose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 bCloseActionPerformed(evt);
-            }
-        });
-
-        bConnection.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        bConnection.setText("Połącz");
-        bConnection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bConnectionActionPerformed(evt);
             }
         });
 
@@ -137,40 +127,33 @@ public class ServerWindow extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
-                    .addComponent(lServerName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 46, Short.MAX_VALUE)
+                        .addGap(0, 184, Short.MAX_VALUE)
                         .addComponent(bClean, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(bConnection, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
                         .addComponent(bClose, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lServerHost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lServerHost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lServerName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lServerName, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addComponent(lServerName)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lServerHost, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bClose, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(bConnection, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bClean, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void bConnectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bConnectionActionPerformed
-        Server.getInstance().connect();
-    }//GEN-LAST:event_bConnectionActionPerformed
 
     private void bCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bCloseActionPerformed
         dispose();
@@ -184,7 +167,6 @@ public class ServerWindow extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bClean;
     private javax.swing.JButton bClose;
-    private javax.swing.JButton bConnection;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lServerHost;
     private javax.swing.JLabel lServerName;
