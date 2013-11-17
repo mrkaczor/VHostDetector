@@ -6,8 +6,9 @@ package config.m;
  */
 public class ResourcesConfiguration implements Cloneable {
 
+    private final String _completionListFile = "completed";
     private final String _researchConfigFile = "conf";
-    private final String _researchStateFile = "completed";
+    private final String _researchStateFile = "status";
     private final String _serversListFile = "iplist";
     private final String _scriptsDirectory = "scripts";
     
@@ -46,6 +47,10 @@ public class ResourcesConfiguration implements Cloneable {
 
     public void setHostmapPath(String hostmapPath) {
         _hostmapPath = hostmapPath;
+    }
+
+    public String getCompletionListFile() {
+        return _completionListFile;
     }
 
     public String getResearchConfigurationFile() {

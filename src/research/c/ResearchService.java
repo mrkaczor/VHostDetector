@@ -18,7 +18,7 @@ import server.m.Console;
 public class ResearchService {
 
     private final int _parallelTasks = 10;
-    private final int _taskTimeout = 5;
+    private final int _taskTimeout = 20;
 
     private ResearchData _researchData;
 
@@ -62,20 +62,28 @@ public class ResearchService {
                 int hostsPerTask = (int) Math.floor(1.0 * hostsCount / _parallelTasks);
                 int hostsInLastTask = hostsCount - (_parallelTasks - 1) * hostsPerTask;
                 for(int i=0; i<scriptsCount-1; i++) {
+                    scriptName = generateScriptName(i+1);
+                    command = "";
                     for(int j=0; j<hostsPerTask; j++) {
-                        command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i*hostsPerTask+j).getIPAddress(), _taskTimeout);
-                        scriptName = generateScriptName(i+1);
-                        srv.executeCommand("echo '" + command + (j==hostsPerTask-1?"":" &&") + "' >> " + scriptPath+"/"+scriptName, true);
-                        srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                        command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i*hostsPerTask+j).getIPAddress(), _taskTimeout);
+                        if(j!=hostsPerTask-1) {
+                            command += " && ";
+                        }
                     }
-                }
-                //Last task
-                for(int i=hostsCount-hostsInLastTask+1; i<=hostsCount; i++) {
-                    command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1).getIPAddress(), _taskTimeout);
-                    scriptName = generateScriptName(scriptsCount);
-                    srv.executeCommand("echo '" + command + (i==hostsCount?"":" &&") + "' >> " + scriptPath+"/"+scriptName, true);
+                    srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, true);
                     srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
                 }
+                //Last task
+                scriptName = generateScriptName(scriptsCount);
+                command = "";
+                for(int i=hostsCount-hostsInLastTask+1; i<=hostsCount; i++) {
+                    command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1).getIPAddress(), _taskTimeout);
+                    if(i!=hostsCount) {
+                        command += " && ";
+                    }
+                }
+                srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, true);
+                srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
             }
         }
         return scriptsCount;
@@ -106,10 +114,12 @@ public class ResearchService {
         Server.getInstance().executeCommand(command, false);
         
         //configuration
-        command = "echo " + _researchData.getCurrentState() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
-        command += " && echo " + _researchData.getRelatedScreenName()+ " >> " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
+        command = "echo " + _researchData.getRelatedScreenName() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
         Server.getInstance().executeCommand(command, false);
-        
+        //state
+        command = "echo " + _researchData.getCurrentState() + " > " + conf.getResearchPath() + "/" + conf.getCompletionListFile();
+        Server.getInstance().executeCommand(command, false);
+
         //servers_list
         uploadServersList(conf.getResearchPath() + "/" + conf.getServersListFile());
     }
@@ -154,18 +164,22 @@ public class ResearchService {
             String command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchConfigurationFile();
             if(Server.getInstance().executeCommand(command, false)) {
                 List<String> configFile = Server.getInstance().readOutputBuffer();
-                _researchData = new ResearchData(configFile.get(1));
-                _researchData.setCurrentState(ResearchState.valueOf(configFile.get(0)));
+                _researchData = new ResearchData(configFile.get(0));
                 _researchData.setStartDate(retrieveDateFromScreenName(_researchData.getRelatedScreenName()));
+                
+                command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchStateFile();
+                if(Server.getInstance().executeCommand(command, false)) {
+                    _researchData.setCurrentState(ResearchState.valueOf(Server.getInstance().readOutputBuffer().get(0)));
+                }
                 
                 command = "head -1 "+ res_config.getResearchPath() + "/" + res_config.getServersListFile();
                 if(Server.getInstance().executeCommand(command, false)) {
                     _researchData.setServersTotal(Integer.parseInt(Server.getInstance().readOutputBuffer().get(0)));
                 }
                 
-                command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchStateFile();
+                command = "cat "+ res_config.getResearchPath() + "/" + res_config.getCompletionListFile();
                 if(Server.getInstance().executeCommand(command, false)) {
-                    _researchData.setServersTotal(Server.getInstance().readOutputBuffer().size());
+                    _researchData.setServersCompleted(Server.getInstance().readOutputBuffer().size());
                 }
             }
         } else {
