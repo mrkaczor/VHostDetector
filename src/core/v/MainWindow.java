@@ -63,7 +63,7 @@ public class MainWindow extends JFrame {
         String progress;
         if(total > 0) {
             progress = done + "/" + total;
-            progress += "(" + (int)(done/total*100) + "%)";
+            progress += " (" + (int)(100.0*done/total) + "%)";
         } else {
             progress = "n/a";
         }
@@ -125,10 +125,12 @@ public class MainWindow extends JFrame {
                 SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
                 lResearchStateValue.setText(researchState==null?"n/a":researchState.toString());
                 lResearchStartDateValue.setText(research.getStartDate()!=null?df.format(research.getStartDate()):"n/a");
+                lResearchEndDateValue.setText(research.getEndDate()!=null?df.format(research.getEndDate()):"n/a");
                 lResearchProgressValue.setText(calculateResearchProgress(research.getServersTotal(),research.getServersCompleted()));
             } else {
                 lResearchStateValue.setText("n/a");
                 lResearchStartDateValue.setText("n/a");
+                lResearchEndDateValue.setText("n/a");
                 lResearchProgressValue.setText("n/a");
             }
         }
@@ -167,6 +169,8 @@ public class MainWindow extends JFrame {
         lResearchStartDateValue = new javax.swing.JLabel();
         lResearchProgress = new javax.swing.JLabel();
         lResearchProgressValue = new javax.swing.JLabel();
+        lResearchEndDate = new javax.swing.JLabel();
+        lResearchEndDateValue = new javax.swing.JLabel();
         pMessagePanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         taMessage = new javax.swing.JTextArea();
@@ -188,6 +192,8 @@ public class MainWindow extends JFrame {
         miRefreshResearchState = new javax.swing.JMenuItem();
 
         pResearchDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Badania"));
+        pResearchDetails.setMinimumSize(new java.awt.Dimension(380, 140));
+        pResearchDetails.setPreferredSize(new java.awt.Dimension(380, 140));
 
         lResearchState.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         lResearchState.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -210,6 +216,13 @@ public class MainWindow extends JFrame {
         lResearchProgressValue.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lResearchProgressValue.setText("-");
 
+        lResearchEndDate.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        lResearchEndDate.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lResearchEndDate.setText("Data zakończenia:");
+
+        lResearchEndDateValue.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        lResearchEndDateValue.setText("-");
+
         javax.swing.GroupLayout pResearchDetailsLayout = new javax.swing.GroupLayout(pResearchDetails);
         pResearchDetails.setLayout(pResearchDetailsLayout);
         pResearchDetailsLayout.setHorizontalGroup(
@@ -228,7 +241,11 @@ public class MainWindow extends JFrame {
                     .addGroup(pResearchDetailsLayout.createSequentialGroup()
                         .addComponent(lResearchProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lResearchProgressValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lResearchProgressValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(pResearchDetailsLayout.createSequentialGroup()
+                        .addComponent(lResearchEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lResearchEndDateValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         pResearchDetailsLayout.setVerticalGroup(
@@ -244,10 +261,17 @@ public class MainWindow extends JFrame {
                     .addComponent(lResearchStartDateValue, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pResearchDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lResearchEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lResearchEndDateValue, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pResearchDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lResearchProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lResearchProgressValue, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        pMessagePanel.setMinimumSize(new java.awt.Dimension(380, 140));
+        pMessagePanel.setPreferredSize(new java.awt.Dimension(380, 140));
 
         jScrollPane1.setBorder(null);
 
@@ -268,11 +292,12 @@ public class MainWindow extends JFrame {
         );
         pMessagePanelLayout.setVerticalGroup(
             pMessagePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("VHostDetector v1.0");
+        setMinimumSize(new java.awt.Dimension(420, 260));
         addWindowFocusListener(new java.awt.event.WindowFocusListener() {
             public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
@@ -370,7 +395,7 @@ public class MainWindow extends JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(pMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lApplicationName, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
+                    .addComponent(lApplicationName, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -379,7 +404,7 @@ public class MainWindow extends JFrame {
                 .addContainerGap()
                 .addComponent(lApplicationName, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                .addComponent(pMainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -451,6 +476,8 @@ public class MainWindow extends JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JLabel lApplicationName;
+    private javax.swing.JLabel lResearchEndDate;
+    private javax.swing.JLabel lResearchEndDateValue;
     private javax.swing.JLabel lResearchProgress;
     private javax.swing.JLabel lResearchProgressValue;
     private javax.swing.JLabel lResearchStartDate;

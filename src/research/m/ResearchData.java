@@ -12,6 +12,7 @@ public class ResearchData {
     private String _screenBaseName;
     private int _screensCount;
     private Date _startDate;
+    private Date _endDate;
     private int _serversTotal;
     private int _serversCompleted;
 
@@ -57,6 +58,14 @@ public class ResearchData {
         _startDate = startDate;
     }
 
+    public Date getEndDate() {
+        return _endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        _endDate = endDate;
+    }
+
     public int getServersTotal() {
         return _serversTotal;
     }
@@ -80,6 +89,7 @@ public class ResearchData {
         researchData += " [screenBaseName="+_screenBaseName+"]";
         researchData += " [screensCount="+_screensCount+"]";
         researchData += " [startDate="+_startDate+"]";
+        researchData += " [endDate="+_endDate+"]";
         researchData += " [serversTotal="+_serversTotal+"]";
         researchData += " [serversCompleted="+_serversCompleted+"]";
         return researchData;
