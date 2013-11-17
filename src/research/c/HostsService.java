@@ -86,7 +86,6 @@ public class HostsService {
     
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
     public void detectVirtualHosts() {
-        ResearchService.getInstance().checkResearchExist();
         if(readHostsIPs()) {
             ResearchService.getInstance().startResearch();
             Server.getInstance().log(Console.SYSTEM, "Successfully loaded "+_hosts.getServersCount()+" servers data!", false);

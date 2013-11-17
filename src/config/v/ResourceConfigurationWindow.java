@@ -8,6 +8,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import server.c.Server;
 
 /**
  *
@@ -23,6 +24,14 @@ public class ResourceConfigurationWindow extends JDialog {
     public ResourceConfigurationWindow() {
         super(MainWindow.getInstance(), "Ustawienia", true);
         initComponents();
+    }
+    
+    private void refreshComponents() {
+        boolean connectionState = Server.getInstance().isConnected();
+        
+        tfGeoIPPath.setEnabled(!connectionState);
+        tfHostMapPath.setEnabled(!connectionState);
+        tfResultsPath.setEnabled(!connectionState);
     }
     
     private void refreshConfiguration() {
@@ -44,6 +53,7 @@ public class ResourceConfigurationWindow extends JDialog {
     @Override
     public void setVisible(boolean visibility) {
         refreshConfiguration();
+        refreshComponents();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation((int) ((dim.width - this.getSize().width) / 2), (int) (dim.height - this.getSize().height) / 2);
         super.setVisible(visibility);

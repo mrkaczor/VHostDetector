@@ -64,6 +64,23 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Badania"/>
           </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="miStartStopResearch">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Rozpocznij badania"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="miStartStopResearchActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="miResearchConfiguration">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Konfiguracja"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
         </Menu>
       </SubComponents>
     </Menu>

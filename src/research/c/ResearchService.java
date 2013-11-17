@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import research.m.HostModel;
 import research.m.ResearchData;
+import research.m.ResearchState;
 import server.c.Server;
 
 /**
@@ -50,11 +51,12 @@ public class ResearchService {
         _researchData.setServersTotal(HostsService.getInstance().getHostsData().getServersCount());
         
         //research_dir
-        command = "mkdir" + conf.getResearchPath();
+        command = "mkdir " + conf.getResearchPath();
         Server.getInstance().executeCommand(command, false);
         
         //configuration
-        command = "echo " + _researchData.getRelatedScreenName() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
+        command = "echo " + _researchData.getCurrentState() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
+        command += " && echo " + _researchData.getRelatedScreenName()+ " >> " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
         Server.getInstance().executeCommand(command, false);
         
         //servers_list
@@ -91,13 +93,18 @@ public class ResearchService {
         return Server.getInstance().executeCommand(command, false);
     }
 
+    public ResearchData getResearchData() {
+        return _researchData;
+    }
+
     public void loadResearchData() {
         if(checkResearchExist()) {
             ResourcesConfiguration res_config = ConfigurationService.getInstance().getResourcesConfiguration();
             String command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchConfigurationFile();
             if(Server.getInstance().executeCommand(command, false)) {
                 List<String> configFile = Server.getInstance().readOutputBuffer();
-                _researchData = new ResearchData(configFile.get(0));
+                _researchData = new ResearchData(configFile.get(1));
+                _researchData.setCurrentState(ResearchState.valueOf(configFile.get(0)));
                 _researchData.setStartDate(retrieveDateFromScreenName(_researchData.getRelatedScreenName()));
                 
                 command = "head -1 "+ res_config.getResearchPath() + "/" + res_config.getServersListFile();
@@ -110,6 +117,10 @@ public class ResearchService {
                     _researchData.setServersTotal(Server.getInstance().readOutputBuffer().size());
                 }
             }
+        } else {
+            _researchData = new ResearchData();
+            _researchData.setStartDate(null);
+            _researchData.setCurrentState(ResearchState.NOT_STARTED);
         }
         System.out.println(_researchData);
     }

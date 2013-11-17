@@ -12,6 +12,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import research.c.ResearchService;
+import research.m.ResearchState;
 import server.c.Server;
 
 /**
@@ -78,6 +79,22 @@ public class MainWindow extends JFrame {
         miConnection.setEnabled(connectionState?true:ConfigurationService.getInstance().getServerConfiguration().isValid());
         mReasearch.setEnabled(connectionState);
         miServerConfiguration.setEnabled(!connectionState);
+        
+        ResearchState researchState;
+        if(ResearchService.getInstance().getResearchData() != null) {
+            researchState = ResearchService.getInstance().getResearchData().getCurrentState();
+        } else {
+            researchState = ResearchState.NOT_STARTED;
+        }
+        if(researchState != null) {
+            miStartStopResearch.setText(!researchState.equals(ResearchState.STARTED)?"Rozpocznij badania":"Zakończ badania");
+            miStartStopResearch.setEnabled(researchState.equals(ResearchState.NOT_STARTED) || researchState.equals(ResearchState.STARTED));
+            miResearchConfiguration.setEnabled(researchState.equals(ResearchState.NOT_STARTED));
+        } else {
+            miStartStopResearch.setText("Rozpocznij badania");
+            miStartStopResearch.setEnabled(connectionState);
+            miResearchConfiguration.setEnabled(connectionState);
+        }
     }
     // </editor-fold>
     
@@ -115,6 +132,9 @@ public class MainWindow extends JFrame {
         miResourceConfiguration = new javax.swing.JMenuItem();
         miServerDetails = new javax.swing.JMenuItem();
         mReasearch = new javax.swing.JMenu();
+        miStartStopResearch = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        miResearchConfiguration = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("VHostDetector v1.0");
@@ -188,6 +208,19 @@ public class MainWindow extends JFrame {
         jMenuBar1.add(mServer);
 
         mReasearch.setText("Badania");
+
+        miStartStopResearch.setText("Rozpocznij badania");
+        miStartStopResearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miStartStopResearchActionPerformed(evt);
+            }
+        });
+        mReasearch.add(miStartStopResearch);
+        mReasearch.add(jSeparator1);
+
+        miResearchConfiguration.setText("Konfiguracja");
+        mReasearch.add(miResearchConfiguration);
+
         jMenuBar1.add(mReasearch);
 
         setJMenuBar(jMenuBar1);
@@ -267,18 +300,31 @@ public class MainWindow extends JFrame {
         closeApplication();
     }//GEN-LAST:event_miExitActionPerformed
 
+    private void miStartStopResearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miStartStopResearchActionPerformed
+        ResearchState state = ResearchState.NOT_STARTED;
+        if(ResearchService.getInstance().getResearchData() != null) {
+            state = ResearchService.getInstance().getResearchData().getCurrentState();
+        }
+        if(ResearchState.NOT_STARTED.equals(state)) {
+            ResearchService.getInstance().startResearch();
+        }
+    }//GEN-LAST:event_miStartStopResearchActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bDetectHosts;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenu mFile;
     private javax.swing.JMenu mReasearch;
     private javax.swing.JMenu mServer;
     private javax.swing.JPopupMenu.Separator mServerSeparator;
     private javax.swing.JMenuItem miConnection;
     private javax.swing.JMenuItem miExit;
+    private javax.swing.JMenuItem miResearchConfiguration;
     private javax.swing.JMenuItem miResourceConfiguration;
     private javax.swing.JMenuItem miServerConfiguration;
     private javax.swing.JMenuItem miServerDetails;
+    private javax.swing.JMenuItem miStartStopResearch;
     // End of variables declaration//GEN-END:variables
 }
