@@ -30,13 +30,13 @@ public class ResourceConfigurationWindow extends JDialog {
         
         tfGeoIPPath.setText(_paths.getGeoIPPath()==null?"":_paths.getGeoIPPath());
         tfHostMapPath.setText(_paths.getHostmapPath()==null?"":_paths.getHostmapPath());
-        tfResultsPath.setText(_paths.getResultsPath()==null?"":_paths.getResultsPath());
+        tfResultsPath.setText(_paths.getResearchPath()==null?"":_paths.getResearchPath());
     }
     
     private void updateConfiguration() {
         _paths.setGeoIPPath(tfGeoIPPath.getText());
         _paths.setHostmapPath(tfHostMapPath.getText());
-        _paths.setResultsPath(tfResultsPath.getText());
+        _paths.setResearchPath(tfResultsPath.getText());
     }
     
     @Override
@@ -62,7 +62,7 @@ public class ResourceConfigurationWindow extends JDialog {
         tfGeoIPPath = new javax.swing.JTextField();
         lHostMapPath = new javax.swing.JLabel();
         tfHostMapPath = new javax.swing.JTextField();
-        lResultsPath = new javax.swing.JLabel();
+        lResearchPath = new javax.swing.JLabel();
         tfResultsPath = new javax.swing.JTextField();
         bSave = new javax.swing.JButton();
         bCancel = new javax.swing.JButton();
@@ -126,15 +126,15 @@ public class ResourceConfigurationWindow extends JDialog {
 
         lHostMapPath.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lHostMapPath.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lHostMapPath.setText("Ścieżka do GeoIP:");
+        lHostMapPath.setText("Ścieżka do HostMap:");
         lHostMapPath.setMaximumSize(new java.awt.Dimension(120, 20));
         lHostMapPath.setMinimumSize(new java.awt.Dimension(120, 20));
 
-        lResultsPath.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        lResultsPath.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lResultsPath.setText("Ścieżka do GeoIP:");
-        lResultsPath.setMaximumSize(new java.awt.Dimension(120, 20));
-        lResultsPath.setMinimumSize(new java.awt.Dimension(120, 20));
+        lResearchPath.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        lResearchPath.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lResearchPath.setText("Ścieżka do plików badań:");
+        lResearchPath.setMaximumSize(new java.awt.Dimension(120, 20));
+        lResearchPath.setMinimumSize(new java.awt.Dimension(120, 20));
 
         javax.swing.GroupLayout pToolsSettingsLayout = new javax.swing.GroupLayout(pToolsSettings);
         pToolsSettings.setLayout(pToolsSettingsLayout);
@@ -147,7 +147,7 @@ public class ResourceConfigurationWindow extends JDialog {
                     .addComponent(tfGeoIPPath, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                     .addComponent(lHostMapPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(tfHostMapPath, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-                    .addComponent(lResultsPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lResearchPath, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(tfResultsPath, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -163,7 +163,7 @@ public class ResourceConfigurationWindow extends JDialog {
                 .addGap(1, 1, 1)
                 .addComponent(tfHostMapPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lResultsPath, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lResearchPath, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
                 .addComponent(tfResultsPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -252,7 +252,7 @@ public class ResourceConfigurationWindow extends JDialog {
     private javax.swing.JLabel lGeoIPPath;
     private javax.swing.JLabel lHostMapPath;
     private javax.swing.JLabel lIPListPath;
-    private javax.swing.JLabel lResultsPath;
+    private javax.swing.JLabel lResearchPath;
     private javax.swing.JPanel pConnectionSettings;
     private javax.swing.JPanel pToolsSettings;
     private javax.swing.JTextField tfGeoIPPath;

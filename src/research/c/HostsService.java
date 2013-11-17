@@ -63,22 +63,23 @@ public class HostsService {
         ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
         String geoIP = config.getGeoIPPath();
         String hostmap = config.getHostmapPath();
-        String results = config.getResultsPath();
+        String results = config.getResearchPath();
+        String output = config.getResearchStateFile();
 
         if (timeout > 0) {
             return String.format("cd %3$s/ "
                     + "&& ./IPtoLocation.pl %1$s > %5$s/%1$s "
                     + "&& cd "
                     + "&& timeout %2$ds ruby %4$s/hostmap.rb -t %1$s >> %5$s/%1$s "
-                    + "&& echo %1$s >> %5$s/completed",
-                    IPAddress, timeout, geoIP, hostmap, results);
+                    + "&& echo %1$s >> %5$s/%6$s",
+                    IPAddress, timeout, geoIP, hostmap, results, output);
         } else {
             return String.format("cd %2$s/ "
                     + "&& ./IPtoLocation.pl %1$s > %4$s/%1$s "
                     + "&& cd "
                     + "&& ruby %3$s/hostmap.rb -t %1$s >> %4$s/%1$s "
-                    + "&& echo %1$s >> %4$s/completed",
-                    IPAddress, geoIP, hostmap, results);
+                    + "&& echo %1$s >> %4$s/%6$s",
+                    IPAddress, geoIP, hostmap, results, output);
         }
     }
     // </editor-fold>
@@ -99,5 +100,5 @@ public class HostsService {
         return _hosts;
     }
     // </editor-fold>
-    
+
 }

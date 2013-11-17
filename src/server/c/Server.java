@@ -67,8 +67,7 @@ public class Server {
         int lineCount = 0;
         try {
             String line;
-            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stdout));
-            brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
+            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
             while ((line = brCleanUp.readLine()) != null) {
                 lineCount++;
                 _console.log(Console.ERROR, line);
@@ -171,7 +170,6 @@ public class Server {
         List<String> output = new ArrayList<>();
         try {
             BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stdout));
-            brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
             String line;
             while ((line = brCleanUp.readLine()) != null) {
                 output.add(line);
@@ -179,6 +177,21 @@ public class Server {
             brCleanUp.close();
         } catch (IOException ex) {
             System.err.println("Unable to read output buffer due to exception: "+ex.getMessage());
+        }
+        return output;
+    }
+
+    public List<String> readErrorBuffer() {
+        List<String> output = new ArrayList<>();
+        try {
+            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
+            String line;
+            while ((line = brCleanUp.readLine()) != null) {
+                output.add(line);
+            }
+            brCleanUp.close();
+        } catch (IOException ex) {
+            System.err.println("Unable to read error buffer due to exception: "+ex.getMessage());
         }
         return output;
     }

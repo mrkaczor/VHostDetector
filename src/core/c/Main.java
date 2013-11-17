@@ -47,6 +47,6 @@ public class Main {
         ConfigurationService.getInstance().getResourcesConfiguration().setHostsListFilePath("res/hosts.txt");
         ConfigurationService.getInstance().getResourcesConfiguration().setGeoIPPath("~/GeoIP");
         ConfigurationService.getInstance().getResourcesConfiguration().setHostmapPath("~/hostmap");
-        ConfigurationService.getInstance().getResourcesConfiguration().setResultsPath("~/results");
+        ConfigurationService.getInstance().getResourcesConfiguration().setResearchPath("~/results");
     }
 }
