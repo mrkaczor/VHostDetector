@@ -106,7 +106,7 @@ public class ResearchService {
                 + "TOTAL=$(head -1 " + ipListFile + ")\n"
                 + "if [ \"$LINES\" == \"$TOTAL\" ]\nthen\n"
                 + "echo " + ResearchState.FINISHED + " > " + stateFile + "\n"
-                + "echo $(date +%s) >> " + stateFile + "\n"
+                + "echo $(date +%s%N | cut -b1-13) >> " + stateFile + "\n"
                 + "fi";
         return script;
     }
@@ -202,13 +202,17 @@ public class ResearchService {
             ResourcesConfiguration res_config = ConfigurationService.getInstance().getResourcesConfiguration();
             String command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchConfigurationFile();
             if(Server.getInstance().executeCommand(command, false)) {
-                List<String> configFile = Server.getInstance().readOutputBuffer();
-                _researchData = new ResearchData(configFile.get(0), Integer.parseInt(configFile.get(1)));
+                List<String> dataFile = Server.getInstance().readOutputBuffer();
+                _researchData = new ResearchData(dataFile.get(0), Integer.parseInt(dataFile.get(1)));
                 _researchData.setStartDate(retrieveDateFromScreenName(_researchData.getRelatedScreenBaseName()));
                 
                 command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchStateFile();
                 if(Server.getInstance().executeCommand(command, false)) {
-                    _researchData.setCurrentState(ResearchState.valueOf(Server.getInstance().readOutputBuffer().get(0)));
+                    dataFile = Server.getInstance().readOutputBuffer();
+                    _researchData.setCurrentState(ResearchState.valueOf(dataFile.get(0)));
+                    if(_researchData.getCurrentState().equals(ResearchState.FINISHED) || _researchData.getCurrentState().equals(ResearchState.TERMINATED)) {
+                        _researchData.setEndDate(new Date(Long.parseLong(dataFile.get(1))));
+                    }
                 }
                 
                 command = "head -1 "+ res_config.getResearchPath() + "/" + res_config.getServersListFile();

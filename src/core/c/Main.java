@@ -37,11 +37,11 @@ public class Main {
     private static void initDefaultConfiguration() {
         ServerConfiguration conf = new ServerConfiguration();
         conf.setName("TEST_SERVER");
-        conf.setHost("dev.4meet.com");
-        conf.setLogin("mjanik");
-        conf.setAuthenticationMode(AuthenticationMode.PRIVATE_KEY);
-        conf.setPassword("wanat5");
-        conf.setKeyPath("res/fourmeet");
+        conf.setHost("156.17.130.81");
+        conf.setLogin("dkaczybura");
+        conf.setAuthenticationMode(AuthenticationMode.PASSWORD);
+        conf.setPassword("pass_kaczy");
+        //conf.setKeyPath("res/fourmeet");
         ConfigurationService.getInstance().updateServerConfiguration(conf);
         
         ConfigurationService.getInstance().getResourcesConfiguration().setHostsListFilePath("res/hosts.txt");
