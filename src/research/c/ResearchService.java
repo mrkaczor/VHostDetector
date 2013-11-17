@@ -5,15 +5,20 @@ import config.m.ResourcesConfiguration;
 import java.util.Date;
 import java.util.List;
 import research.m.HostModel;
+import research.m.HostsHolder;
 import research.m.ResearchData;
 import research.m.ResearchState;
 import server.c.Server;
+import server.m.Console;
 
 /**
  *
  * @author mrkaczor
  */
 public class ResearchService {
+
+    private final int _parallelTasks = 10;
+    private final int _taskTimeout = 5;
 
     private ResearchData _researchData;
 
@@ -34,12 +39,58 @@ public class ResearchService {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
+    private int crateBashScripts() {
+        Server srv = Server.getInstance();
+        HostsHolder hosts = HostsService.getInstance().getHostsData();
+        //scripts_dir
+        String scriptPath = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" + ConfigurationService.getInstance().getResourcesConfiguration().getScriptsDirectory();
+        int scriptsCount = 0;
+        srv.executeCommand("mkdir results");
+        if(srv.executeCommand("mkdir " + scriptPath, true)) {
+            String command, scriptName;
+            int hostsCount = HostsService.getInstance().getHostsData().getServersCount();
+            scriptsCount = _parallelTasks;
+            if(_parallelTasks > hostsCount) {
+                scriptsCount = hostsCount;
+                for(int i=1; i<=scriptsCount; i++) {
+                    command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1).getIPAddress(), _taskTimeout);
+                    scriptName = generateScriptName(i);
+                    srv.executeCommand("echo '" + command + "' > " + scriptPath+"/"+scriptName, true);
+                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                }
+            } else {
+                int hostsPerTask = (int) Math.floor(1.0 * hostsCount / _parallelTasks);
+                int hostsInLastTask = hostsCount - (_parallelTasks - 1) * hostsPerTask;
+                for(int i=0; i<scriptsCount-1; i++) {
+                    for(int j=0; j<hostsPerTask; j++) {
+                        command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i*hostsPerTask+j).getIPAddress(), _taskTimeout);
+                        scriptName = generateScriptName(i+1);
+                        srv.executeCommand("echo '" + command + (j==hostsPerTask-1?"":" &&") + "' >> " + scriptPath+"/"+scriptName, true);
+                        srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                    }
+                }
+                //Last task
+                for(int i=hostsCount-hostsInLastTask+1; i<=hostsCount; i++) {
+                    command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1).getIPAddress(), _taskTimeout);
+                    scriptName = generateScriptName(scriptsCount);
+                    srv.executeCommand("echo '" + command + (i==hostsCount?"":" &&") + "' >> " + scriptPath+"/"+scriptName, true);
+                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                }
+            }
+        }
+        return scriptsCount;
+    }
+
     private String generateScreenName(Date date) {
         String screenName = "vhostdetector";
         if(date != null) {
             screenName += "_"+date.getTime();
         }
         return screenName;
+    }
+
+    private String generateScriptName(int scriptId) {
+        return "script_" + (scriptId<10?"0":"") + scriptId + ".sh";
     }
 
     private void initializeResearch() {
@@ -127,8 +178,18 @@ public class ResearchService {
 
     public void startResearch() {
         if(!checkResearchExist()) {
-            initializeResearch();
-            //TODO next steps...
+            if(HostsService.getInstance().loadServersData()) {
+                //initializeResearch();
+                //crateBashScripts();
+                crateBashScripts();
+                //runBashScripts();
+
+                //TODO next steps...
+                Server.getInstance().log(Console.SYSTEM, "Rozpoczęto badania na serwerze "+ConfigurationService.getInstance().getServerConfiguration().getHost()+"!", false);
+            } else {
+                System.out.println("somethings wrong ;(");
+                Server.getInstance().log(Console.SYSTEM, "Nie można rozpocząć badań z powodu braku listy serwerów!", true);
+            }
         }
     }
     // </editor-fold>

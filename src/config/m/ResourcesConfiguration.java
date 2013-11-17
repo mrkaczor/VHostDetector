@@ -9,6 +9,7 @@ public class ResourcesConfiguration implements Cloneable {
     private final String _researchConfigFile = "conf";
     private final String _researchStateFile = "completed";
     private final String _serversListFile = "iplist";
+    private final String _scriptsDirectory = "scripts";
     
     private String _hostsListFilePath;
     private String _geoIPPath;
@@ -57,6 +58,10 @@ public class ResourcesConfiguration implements Cloneable {
 
     public String getServersListFile() {
         return _serversListFile;
+    }
+
+    public String getScriptsDirectory() {
+        return _scriptsDirectory;
     }
 
     @Override

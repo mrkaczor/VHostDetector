@@ -36,7 +36,11 @@ public class HostsService {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
-    private boolean readHostsIPs() {
+    
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
+    public boolean loadServersData() {
         String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
         if(filePath != null && !filePath.equals("")) {
             _hosts.getHosts().clear();
@@ -48,18 +52,19 @@ public class HostsService {
                     host = new HostModel(line);
                     _hosts.addHost(host);
                 }
+                Server.getInstance().log(Console.SYSTEM, "Successfully loaded "+_hosts.getServersCount()+" servers data!", false);
                 return true;
             } catch(IOException ex) {
-                Server.getInstance().log(Console.ERROR, "Wystąpił błąd podczas próby wczytania danych serwerów", true);
+                Server.getInstance().log(Console.SYSTEM, "Wystąpił błąd podczas próby wczytania danych serwerów: "+ex.getMessage(), true);
                 System.err.println("Wystąpił błąd podczas próby wczytania danych serwerów:\n"+ex.getMessage());
             }
         } else {
-            Server.getInstance().log(Console.ERROR, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
+            Server.getInstance().log(Console.SYSTEM, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
         }
         return false;
     }
 
-    private String generateIPLookupCommand(String IPAddress, int timeout) {
+    public String generateIPLookupCommand(String IPAddress, int timeout) {
         ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
         String geoIP = config.getGeoIPPath();
         String hostmap = config.getHostmapPath();
@@ -80,18 +85,6 @@ public class HostsService {
                     + "&& ruby %3$s/hostmap.rb -t %1$s >> %4$s/%1$s "
                     + "&& echo %1$s >> %4$s/%6$s",
                     IPAddress, geoIP, hostmap, results, output);
-        }
-    }
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
-    public void detectVirtualHosts() {
-        if(readHostsIPs()) {
-            ResearchService.getInstance().startResearch();
-            Server.getInstance().log(Console.SYSTEM, "Successfully loaded "+_hosts.getServersCount()+" servers data!", false);
-//            for(HostModel host : _hosts.getHosts()) {
-//                System.out.println(generateIPLookupCommand(host.getIPAddress(), 600));
-//            }
         }
     }
 
