@@ -9,7 +9,8 @@ import java.util.Date;
 public class ResearchData {
 
     private ResearchState _currentState;
-    private String _screenName;
+    private String _screenBaseName;
+    private int _screensCount;
     private Date _startDate;
     private int _serversTotal;
     private int _serversCompleted;
@@ -19,8 +20,9 @@ public class ResearchData {
         _startDate = new Date();
     }
 
-    public ResearchData(String screenName) {
-        _screenName= screenName;
+    public ResearchData(String screenName, int screensCount) {
+        _screenBaseName= screenName;
+        _screensCount = screensCount;
     }
 
     public ResearchState getCurrentState() {
@@ -31,12 +33,20 @@ public class ResearchData {
         _currentState = currentState;
     }
 
-    public String getRelatedScreenName() {
-        return _screenName;
+    public String getRelatedScreenBaseName() {
+        return _screenBaseName;
     }
 
-    public void setRelatedScreenName(String screenName) {
-        _screenName = screenName;
+    public void setRelatedScreenBaseName(String screenName) {
+        _screenBaseName = screenName;
+    }
+
+    public int getRelatedScreensCount() {
+        return _screensCount;
+    }
+
+    public void setRelatedScreensCount(int screensCount) {
+        _screensCount = screensCount;
     }
 
     public Date getStartDate() {
@@ -67,7 +77,8 @@ public class ResearchData {
     public String toString() {
         String researchData = this.getClass().getName() + ":";
         researchData += " [currentState="+_currentState+"]";
-        researchData += " [screenName="+_screenName+"]";
+        researchData += " [screenBaseName="+_screenBaseName+"]";
+        researchData += " [screensCount="+_screensCount+"]";
         researchData += " [startDate="+_startDate+"]";
         researchData += " [serversTotal="+_serversTotal+"]";
         researchData += " [serversCompleted="+_serversCompleted+"]";

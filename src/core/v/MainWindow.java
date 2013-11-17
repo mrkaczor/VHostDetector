@@ -183,8 +183,9 @@ public class MainWindow extends JFrame {
         miServerDetails = new javax.swing.JMenuItem();
         mReasearch = new javax.swing.JMenu();
         miStartStopResearch = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         miResearchConfiguration = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        miRefreshResearchState = new javax.swing.JMenuItem();
 
         pResearchDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Badania"));
 
@@ -344,10 +345,18 @@ public class MainWindow extends JFrame {
             }
         });
         mReasearch.add(miStartStopResearch);
-        mReasearch.add(jSeparator1);
 
         miResearchConfiguration.setText("Konfiguracja");
         mReasearch.add(miResearchConfiguration);
+        mReasearch.add(jSeparator1);
+
+        miRefreshResearchState.setText("Aktualizuj status");
+        miRefreshResearchState.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miRefreshResearchStateActionPerformed(evt);
+            }
+        });
+        mReasearch.add(miRefreshResearchState);
 
         jMenu.add(mReasearch);
 
@@ -432,6 +441,11 @@ public class MainWindow extends JFrame {
         }
     }//GEN-LAST:event_miStartStopResearchActionPerformed
 
+    private void miRefreshResearchStateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miRefreshResearchStateActionPerformed
+        ResearchService.getInstance().loadResearchData();
+        refreshComponents();
+    }//GEN-LAST:event_miRefreshResearchStateActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar jMenu;
     private javax.swing.JScrollPane jScrollPane1;
@@ -449,6 +463,7 @@ public class MainWindow extends JFrame {
     private javax.swing.JPopupMenu.Separator mServerSeparator;
     private javax.swing.JMenuItem miConnection;
     private javax.swing.JMenuItem miExit;
+    private javax.swing.JMenuItem miRefreshResearchState;
     private javax.swing.JMenuItem miResearchConfiguration;
     private javax.swing.JMenuItem miResourceConfiguration;
     private javax.swing.JMenuItem miServerConfiguration;

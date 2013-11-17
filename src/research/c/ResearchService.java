@@ -45,8 +45,9 @@ public class ResearchService {
         //scripts_dir
         String scriptPath = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" + ConfigurationService.getInstance().getResourcesConfiguration().getScriptsDirectory();
         int scriptsCount = 0;
-        srv.executeCommand("mkdir results");
-        if(srv.executeCommand("mkdir " + scriptPath, true)) {
+        //TODO delete next line!!!
+        //srv.executeCommand("mkdir results");
+        if(srv.executeCommand("mkdir " + scriptPath, false)) {
             String command, scriptName;
             int hostsCount = HostsService.getInstance().getHostsData().getServersCount();
             scriptsCount = _parallelTasks;
@@ -55,8 +56,8 @@ public class ResearchService {
                 for(int i=1; i<=scriptsCount; i++) {
                     command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1).getIPAddress(), _taskTimeout);
                     scriptName = generateScriptName(i);
-                    srv.executeCommand("echo '" + command + "' > " + scriptPath+"/"+scriptName, true);
-                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                    srv.executeCommand("echo '" + command + "' > " + scriptPath+"/"+scriptName, false);
+                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, false);
                 }
             } else {
                 int hostsPerTask = (int) Math.floor(1.0 * hostsCount / _parallelTasks);
@@ -70,8 +71,8 @@ public class ResearchService {
                             command += " && ";
                         }
                     }
-                    srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, true);
-                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                    srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, false);
+                    srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, false);
                 }
                 //Last task
                 scriptName = generateScriptName(scriptsCount);
@@ -82,19 +83,23 @@ public class ResearchService {
                         command += " && ";
                     }
                 }
-                srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, true);
-                srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, true);
+                srv.executeCommand("echo '" + command + "' >> " + scriptPath+"/"+scriptName, false);
+                srv.executeCommand("chmod +x "+scriptPath+"/"+scriptName, false);
             }
         }
         return scriptsCount;
     }
 
-    private String generateScreenName(Date date) {
+    private String generateScreenBaseName(Date date) {
         String screenName = "vhostdetector";
         if(date != null) {
             screenName += "_"+date.getTime();
         }
         return screenName;
+    }
+
+    private String generateScreenName(int screenId) {
+        return _researchData.getRelatedScreenBaseName() + "_" + (screenId<10?"0":"") + screenId;
     }
 
     private String generateScriptName(int scriptId) {
@@ -106,7 +111,8 @@ public class ResearchService {
         String command;
         
         _researchData = new ResearchData();
-        _researchData.setRelatedScreenName(generateScreenName(_researchData.getStartDate()));
+        _researchData.setRelatedScreenBaseName(generateScreenBaseName(_researchData.getStartDate()));
+        _researchData.setRelatedScreensCount(_parallelTasks);
         _researchData.setServersTotal(HostsService.getInstance().getHostsData().getServersCount());
         
         //research_dir
@@ -114,10 +120,12 @@ public class ResearchService {
         Server.getInstance().executeCommand(command, false);
         
         //configuration
-        command = "echo " + _researchData.getRelatedScreenName() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
+        command = "echo " + _researchData.getRelatedScreenBaseName() + " > " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
+        Server.getInstance().executeCommand(command, false);
+        command = "echo " + _researchData.getRelatedScreensCount() + " >> " + conf.getResearchPath() + "/" + conf.getResearchConfigurationFile();
         Server.getInstance().executeCommand(command, false);
         //state
-        command = "echo " + _researchData.getCurrentState() + " > " + conf.getResearchPath() + "/" + conf.getCompletionListFile();
+        command = "echo " + _researchData.getCurrentState() + " > " + conf.getResearchPath() + "/" + conf.getResearchStateFile();
         Server.getInstance().executeCommand(command, false);
 
         //servers_list
@@ -133,6 +141,16 @@ public class ResearchService {
             System.err.println("Unable to retrieve date from screen name due to exception: "+ex.getMessage());
         }
         return date;
+    }
+
+    private void runBashScripts() {
+        String scriptPath = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" + ConfigurationService.getInstance().getResourcesConfiguration().getScriptsDirectory();
+        String command;
+        for(int i=0; i<_researchData.getRelatedScreensCount(); i++) {
+            command = "screen -dmS " + generateScreenName(i+1) + " ";
+            command += scriptPath + "/" + generateScriptName(i+1);
+            Server.getInstance().executeCommand(command, true);
+        }
     }
 
     private void uploadServersList(String path) {
@@ -164,8 +182,8 @@ public class ResearchService {
             String command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchConfigurationFile();
             if(Server.getInstance().executeCommand(command, false)) {
                 List<String> configFile = Server.getInstance().readOutputBuffer();
-                _researchData = new ResearchData(configFile.get(0));
-                _researchData.setStartDate(retrieveDateFromScreenName(_researchData.getRelatedScreenName()));
+                _researchData = new ResearchData(configFile.get(0), Integer.parseInt(configFile.get(1)));
+                _researchData.setStartDate(retrieveDateFromScreenName(_researchData.getRelatedScreenBaseName()));
                 
                 command = "cat "+ res_config.getResearchPath() + "/" + res_config.getResearchStateFile();
                 if(Server.getInstance().executeCommand(command, false)) {
@@ -193,12 +211,9 @@ public class ResearchService {
     public void startResearch() {
         if(!checkResearchExist()) {
             if(HostsService.getInstance().loadServersData()) {
-                //initializeResearch();
-                //crateBashScripts();
+                initializeResearch();
                 crateBashScripts();
-                //runBashScripts();
-
-                //TODO next steps...
+                runBashScripts();
                 Server.getInstance().log(Console.SYSTEM, "Rozpoczęto badania na serwerze "+ConfigurationService.getInstance().getServerConfiguration().getHost()+"!", false);
             } else {
                 System.out.println("somethings wrong ;(");
