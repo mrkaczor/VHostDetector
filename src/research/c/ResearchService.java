@@ -18,7 +18,7 @@ import server.m.Console;
 public class ResearchService {
 
     private final int _parallelTasks = 10;
-    private final int _taskTimeout = 20;
+    private final int _taskTimeout = 300;
 
     private ResearchData _researchData;
 
@@ -43,12 +43,18 @@ public class ResearchService {
     private int crateBashScripts() {
         Server srv = Server.getInstance();
         HostsHolder hosts = HostsService.getInstance().getHostsData();
+        String finishScriptFile = ConfigurationService.getInstance().getResourcesConfiguration().getFinishedScriptFile();
         //scripts_dir
         String scriptPath = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" + ConfigurationService.getInstance().getResourcesConfiguration().getScriptsDirectory();
         int scriptsCount = 0;
+        
         //TODO delete next line!!!
         //srv.executeCommand("mkdir results");
         if (srv.executeCommand("mkdir " + scriptPath, false)) {
+            //Finish script
+            srv.executeCommand("echo '" + createFinishScript() + "' > " + scriptPath + "/" + finishScriptFile, false);
+            srv.executeCommand("chmod +x " + scriptPath + "/" + finishScriptFile, false);
+            
             String command, scriptName;
             int hostsCount = HostsService.getInstance().getHostsData().getServersCount();
             scriptsCount = _parallelTasks;
@@ -91,6 +97,21 @@ public class ResearchService {
             }
         }
         return scriptsCount;
+    }
+
+    private String createFinishScript() {
+        String completetionFile = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" +ConfigurationService.getInstance().getResourcesConfiguration().getCompletionListFile();
+        String ipListFile = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" +ConfigurationService.getInstance().getResourcesConfiguration().getServersListFile();
+        String stateFile = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" +ConfigurationService.getInstance().getResourcesConfiguration().getResearchStateFile();
+        String script = "#!/bin/bash\n";
+        script += "echo \"$1\" >> " + completetionFile + "\n"
+                + "LINES=$(wc -l < " + completetionFile + ")\n"
+                + "TOTAL=$(head -1 " + ipListFile + ")\n"
+                + "if [ \"$LINES\" == \"$TOTAL\" ]\nthen\n"
+                + "echo " + ResearchState.FINISHED + " > " + stateFile + "\n"
+                + "echo $(date +%s) >> " + stateFile + "\n"
+                + "fi";
+        return script;
     }
 
     private String generateScreenBaseName(Date date) {

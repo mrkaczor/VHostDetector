@@ -69,22 +69,23 @@ public class HostsService {
         String geoIP = config.getGeoIPPath();
         String hostmap = config.getHostmapPath();
         String results = config.getResearchPath();
-        String output = config.getCompletionListFile();
+        String scripts = config.getScriptsDirectory();
+        String output = config.getFinishedScriptFile();
 
         if (timeout > 0) {
             return String.format("cd %3$s/ "
                     + "&& ./IPtoLocation.pl %1$s > %5$s/%1$s "
                     + "&& cd "
                     + "&& perl -e \"alarm %2$d; exec @ARGV\" \"ruby %4$s/hostmap.rb -t %1$s >> %5$s/%1$s\" "
-                    + "&& echo %1$s >> %5$s/%6$s",
-                    IPAddress, timeout, geoIP, hostmap, results, output);
+                    + "&& %5$s/%7$s/%6$s %1$s",
+                    IPAddress, timeout, geoIP, hostmap, results, output, scripts);
         } else {
             return String.format("cd %2$s/ "
                     + "&& ./IPtoLocation.pl %1$s > %4$s/%1$s "
                     + "&& cd "
                     + "&& ruby %3$s/hostmap.rb -t %1$s >> %4$s/%1$s "
-                    + "&& echo %1$s >> %4$s/%6$s",
-                    IPAddress, geoIP, hostmap, results, output);
+                    + "&& %5$s/%7$s/%6$s %1$s",
+                    IPAddress, geoIP, hostmap, results, output, scripts);
         }
     }
 

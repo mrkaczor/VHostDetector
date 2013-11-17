@@ -11,6 +11,7 @@ public class ResourcesConfiguration implements Cloneable {
     private final String _researchStateFile = "status";
     private final String _serversListFile = "iplist";
     private final String _scriptsDirectory = "scripts";
+    private final String _scriptFinishFile = "finish.sh";
     
     private String _hostsListFilePath;
     private String _geoIPPath;
@@ -67,6 +68,10 @@ public class ResourcesConfiguration implements Cloneable {
 
     public String getScriptsDirectory() {
         return _scriptsDirectory;
+    }
+
+    public String getFinishedScriptFile() {
+        return _scriptFinishFile;
     }
 
     @Override
