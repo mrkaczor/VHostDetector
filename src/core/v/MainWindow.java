@@ -1,7 +1,7 @@
 package core.v;
 
 import config.c.ConfigurationService;
-import server.v.ServerWindow;
+import server.v.ConsoleWindow;
 import config.v.ResourceConfigurationWindow;
 import config.v.ServerConfigurationWindow;
 import research.c.HostsService;
@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import research.c.ResearchService;
 import server.c.Server;
 
 /**
@@ -20,7 +21,7 @@ import server.c.Server;
 public class MainWindow extends JFrame {
     
     // <editor-fold defaultstate="collapsed" desc="Object variables">
-    private ServerWindow _serverDetails;
+    private ConsoleWindow _serverDetails;
     private ResourceConfigurationWindow _resourceConfig;
     private ServerConfigurationWindow _serverConfig;
     // </editor-fold>
@@ -40,7 +41,7 @@ public class MainWindow extends JFrame {
      * Creates new form MainWindow
      */
     private MainWindow() {
-        _serverDetails = new ServerWindow();
+        _serverDetails = new ConsoleWindow();
         _resourceConfig = new ResourceConfigurationWindow();
         _serverConfig = new ServerConfigurationWindow();
         WindowAdapter wa = new WindowAdapter() {
@@ -224,7 +225,7 @@ public class MainWindow extends JFrame {
 
     private void miServerDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miServerDetailsActionPerformed
         if(_serverDetails == null) {
-            _serverDetails = new ServerWindow();
+            _serverDetails = new ConsoleWindow();
         }
         _serverDetails.setVisible(true);
     }//GEN-LAST:event_miServerDetailsActionPerformed
@@ -249,6 +250,9 @@ public class MainWindow extends JFrame {
             operationResult = Server.getInstance().disconnect();
         } else {
             operationResult = Server.getInstance().connect();
+            if(operationResult) {
+                ResearchService.getInstance().loadResearchData();
+            }
         }
         if(operationResult) {
             refreshComponents();

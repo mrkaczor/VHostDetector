@@ -25,8 +25,8 @@ public class Server {
     private Connection _connection;
     private Console _console;
     private boolean _connectionClosed;
-    private InputStream _stderr;
-    private InputStream _stdout;
+    private List<String> _stderrBuffer;
+    private List<String> _stdoutBuffer;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
@@ -47,36 +47,44 @@ public class Server {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
-    private int readInfoStreams() {
-        int lineCount = 0;
+    private int readInfoStreams(InputStream stream, boolean enableLog) {
+        _stdoutBuffer = new ArrayList<>();
         try {
             String line;
-            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stdout));
+            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(stream));
             while ((line = brCleanUp.readLine()) != null) {
-                lineCount++;
-                _console.log(Console.MESSAGE, line);
+                _stdoutBuffer.add(line);
             }
             brCleanUp.close();
+            if(enableLog) {
+                for(String log : _stdoutBuffer) {
+                    _console.log(Console.MESSAGE, log);
+                }
+            }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
-        return lineCount;
+        return _stdoutBuffer.size();
     }
     
-    private int readErrorStreams() {
-        int lineCount = 0;
+    private int readErrorStreams(InputStream stream, boolean enableLog) {
+        _stderrBuffer = new ArrayList<>();
         try {
             String line;
-            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
+            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(stream));
             while ((line = brCleanUp.readLine()) != null) {
-                lineCount++;
-                _console.log(Console.ERROR, line);
+                _stderrBuffer.add(line);
             }
             brCleanUp.close();
+            if(enableLog) {
+                for(String log : _stderrBuffer) {
+                    _console.log(Console.ERROR, log);
+                }
+            }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
-        return lineCount;
+        return _stderrBuffer.size();
     }
     // </editor-fold>
     
@@ -124,20 +132,24 @@ public class Server {
         if(!_connectionClosed && _connection != null) {
             if(logOutput) {
                 log(Console.SYSTEM, "Executing command:\t"+command, false);
+            } else {
+                System.out.println("Executing command:\t"+command);
             }
             Session session;
+            InputStream outputStream;
             int outputCount = 0;
             int errorCount = 0;
             try {
                 session = _connection.openSession();
                 session.execCommand(command);
                 System.out.println("Command executed!");
-                _stdout = new StreamGobbler(session.getStdout());
-                _stderr = new StreamGobbler(session.getStderr());
-                if(logOutput) {
-                    outputCount = readInfoStreams();
-                    errorCount = readErrorStreams();
-                }
+                
+                outputStream = new StreamGobbler(session.getStdout());
+                outputCount = readInfoStreams(outputStream, logOutput);
+                
+                outputStream = new StreamGobbler(session.getStderr());
+                errorCount = readErrorStreams(outputStream, logOutput);
+                
                 session.close();
                 return errorCount == 0;
             } catch (IOException ex) {
@@ -167,33 +179,11 @@ public class Server {
     }
 
     public List<String> readOutputBuffer() {
-        List<String> output = new ArrayList<>();
-        try {
-            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stdout));
-            String line;
-            while ((line = brCleanUp.readLine()) != null) {
-                output.add(line);
-            }
-            brCleanUp.close();
-        } catch (IOException ex) {
-            System.err.println("Unable to read output buffer due to exception: "+ex.getMessage());
-        }
-        return output;
+        return _stdoutBuffer;
     }
 
     public List<String> readErrorBuffer() {
-        List<String> output = new ArrayList<>();
-        try {
-            BufferedReader brCleanUp = new BufferedReader(new InputStreamReader(_stderr));
-            String line;
-            while ((line = brCleanUp.readLine()) != null) {
-                output.add(line);
-            }
-            brCleanUp.close();
-        } catch (IOException ex) {
-            System.err.println("Unable to read error buffer due to exception: "+ex.getMessage());
-        }
-        return output;
+        return _stderrBuffer;
     }
 
     public void log(int level, String message, boolean showConsole) {

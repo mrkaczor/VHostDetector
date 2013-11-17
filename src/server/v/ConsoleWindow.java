@@ -14,14 +14,14 @@ import server.m.LogMessage;
  *
  * @author mrkaczor
  */
-public class ServerWindow extends javax.swing.JDialog {
+public class ConsoleWindow extends javax.swing.JDialog {
     
     private int _cleanIndex;
     
     /**
      * Creates new form ServerWindow
      */
-    public ServerWindow() {
+    public ConsoleWindow() {
         super(MainWindow.getInstance(), false);
         _cleanIndex = 0;
         initComponents();
@@ -57,11 +57,11 @@ public class ServerWindow extends javax.swing.JDialog {
         taConsole.setText("");
         for(LogMessage log : logs) {
             if(log.getLevel() == Console.ERROR) {
-                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [ERROR]  "+log.getMessage()+"\n");
+                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [ERROR]   "+log.getMessage()+"\n");
             } else if(log.getLevel() == Console.MESSAGE) {
-                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [INFO]   "+log.getMessage()+"\n");
+                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [INFO]    "+log.getMessage()+"\n");
             } else {
-                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [SYTEM]  "+log.getMessage()+"\n");
+                taConsole.setText(taConsole.getText()+formatTime(log.getDate())+"  [SYSTEM]  "+log.getMessage()+"\n");
             }
         }
     }

@@ -28,12 +28,14 @@ public class ResourceConfigurationWindow extends JDialog {
     private void refreshConfiguration() {
         _paths = ConfigurationService.getInstance().getResourcesConfiguration().clone();
         
+        tfIPListPath.setText(_paths.getHostsListFilePath()==null?"":_paths.getHostsListFilePath());
         tfGeoIPPath.setText(_paths.getGeoIPPath()==null?"":_paths.getGeoIPPath());
         tfHostMapPath.setText(_paths.getHostmapPath()==null?"":_paths.getHostmapPath());
         tfResultsPath.setText(_paths.getResearchPath()==null?"":_paths.getResearchPath());
     }
     
     private void updateConfiguration() {
+        _paths.setHostsListFilePath(tfIPListPath.getText());
         _paths.setGeoIPPath(tfGeoIPPath.getText());
         _paths.setHostmapPath(tfHostMapPath.getText());
         _paths.setResearchPath(tfResultsPath.getText());
@@ -51,7 +53,7 @@ public class ResourceConfigurationWindow extends JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jFileChooser1 = new javax.swing.JFileChooser();
+        fileChooser = new javax.swing.JFileChooser();
         jLabel1 = new javax.swing.JLabel();
         pConnectionSettings = new javax.swing.JPanel();
         lIPListPath = new javax.swing.JLabel();
@@ -232,10 +234,10 @@ public class ResourceConfigurationWindow extends JDialog {
 
     private void bIPListPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bIPListPathActionPerformed
         // TODO add your handling code here:
-        int returnVal = jFileChooser1.showOpenDialog(this);
+        int returnVal = fileChooser.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
+            File file = fileChooser.getSelectedFile();
             //This is where a real application would open the file.
             tfIPListPath.setText(file.getPath());
         } else {
@@ -247,7 +249,7 @@ public class ResourceConfigurationWindow extends JDialog {
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bIPListPath;
     private javax.swing.JButton bSave;
-    private javax.swing.JFileChooser jFileChooser1;
+    private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lGeoIPPath;
     private javax.swing.JLabel lHostMapPath;
