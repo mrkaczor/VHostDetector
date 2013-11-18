@@ -1,0 +1,19 @@
+#!/usr/bin/perl 
+ 
+use Geo::IP; 
+ 
+my $gi =   Geo::IP->open( "GeoLiteCity.dat", GEOIP_STANDARD ); 
+ 
+   my $r = $gi->record_by_name($ARGV[0]); 
+	 
+   if ($r) { 
+     print join( "\n", 
+                 $r->country_code, $r->country_name, $r->city, 
+                 $r->region,       $r->region_name,  $r->postal_code, 
+                 $r->latitude,     $r->longitude,    $r->metro_code, 
+                 $r->area_code ) 
+       . "\n"; 
+   } 
+   else { 
+     print "Location of this IP Address is NOT defined !\n"; 
+   }

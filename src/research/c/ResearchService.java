@@ -249,6 +249,29 @@ public class ResearchService {
             }
         }
     }
+
+    public void terminateResearch() {
+        System.out.print("Research exist check... ");
+        if (checkResearchExist()) {
+            System.out.println("TRUE");
+            loadResearchData();
+            System.out.println("Research state: "+_researchData.getCurrentState());
+            if(_researchData.getCurrentState().equals(ResearchState.STARTED)) {
+                System.out.println("Research state check... STARTED");
+                System.out.println("Perfofming research termination...");
+                String stateFile = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" +ConfigurationService.getInstance().getResourcesConfiguration().getResearchStateFile();
+                //Terminate screen sessions
+                for(int i=0; i<_researchData.getRelatedScreensCount(); i++) {
+                    Server.getInstance().executeCommand("screen -S " + generateScreenName(i+1) + " -X quit", true);
+                }
+                //Update state
+                _researchData.setCurrentState(ResearchState.TERMINATED);
+                _researchData.setEndDate(new Date());
+                Server.getInstance().executeCommand("echo '" + _researchData.getCurrentState() + "' > " + stateFile, false);
+                Server.getInstance().executeCommand("echo '" + _researchData.getEndDate().getTime() + "' >> " + stateFile, false);
+            }
+        }
+    }
     // </editor-fold>
 
 }
