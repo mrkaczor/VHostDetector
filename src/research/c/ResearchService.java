@@ -18,7 +18,7 @@ import server.m.Console;
 public class ResearchService {
 
     private final int _parallelTasks = 10;
-    private final int _taskTimeout = 300;
+    private final int _taskTimeout = 1000;
 
     private ResearchData _researchData;
 
