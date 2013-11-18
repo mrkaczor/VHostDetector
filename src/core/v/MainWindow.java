@@ -463,6 +463,16 @@ public class MainWindow extends JFrame {
         if(ResearchState.NOT_STARTED.equals(state)) {
             ResearchService.getInstance().startResearch();
             refreshComponents();
+        } else if (ResearchState.STARTED.equals(state)) {
+            Object[] opt = {"TAK", "NIE"};
+            String sMessage = "UWAGA! W wyniku tej operacji wznowienie obecnych badań nie będzie możliwe!\nCzy jesteś pewien że chcesz przerwać badania?";
+            int choice = JOptionPane.showOptionDialog(null, sMessage, "Kończenie pracy programu", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opt, null);
+            if(choice == 0) {
+                System.out.println("CHOOSEN YES!");
+                ResearchService.getInstance().terminateResearch();
+                System.out.println("Research terminated!");
+                refreshComponents();
+            }
         }
     }//GEN-LAST:event_miStartStopResearchActionPerformed
 
