@@ -12,7 +12,7 @@ import server.c.Server;
 import server.m.Console;
 
 /**
- *
+ * Serwis pozwalający na zarządzanie instancjami i przebiegiem badań.
  * @author mrkaczor
  */
 public class ResearchService {
@@ -190,16 +190,28 @@ public class ResearchService {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
+    /**
+     * Sprawdza, czy na zdalnym serwerze istnieje instancja badań.
+     * @return true, jeżeli na serwerze istnieje instancja badań, false w przeciwnym wypadku
+     */
     public boolean checkResearchExist() {
         ResourcesConfiguration res_config = ConfigurationService.getInstance().getResourcesConfiguration();
         String command = "head -1 " + res_config.getResearchPath() + "/" + res_config.getResearchConfigurationFile();
         return Server.getInstance().executeCommand(command, false);
     }
 
+    /**
+     * Zwraca dane aktualnie wczytanej instancji badań.
+     * @return dane aktualnej instancji badań
+     */
     public ResearchData getResearchData() {
         return _researchData;
     }
 
+    /**
+     * Pobiera z serwera dane dotyczące znajdującej się na nim instancji badań. Jeżeli na serwerze
+     * nie ma żadnej instancji badań, dotychczas wczytana w aplikacji instancja nie ulega zmianie.
+     */
     public void loadResearchData() {
         if (checkResearchExist()) {
             ResourcesConfiguration res_config = ConfigurationService.getInstance().getResourcesConfiguration();
@@ -236,6 +248,9 @@ public class ResearchService {
         System.out.println(_researchData);
     }
 
+    /**
+     * Inicjalizuje a następnie rozpoczyna badania na serwerze.
+     */
     public void startResearch() {
         if (!checkResearchExist()) {
             if (HostsService.getInstance().loadServersData()) {
@@ -250,15 +265,13 @@ public class ResearchService {
         }
     }
 
+    /**
+     * Powoduje anulowanie aktualnie uruchomionych na serwerze badań.
+     */
     public void terminateResearch() {
-        System.out.print("Research exist check... ");
         if (checkResearchExist()) {
-            System.out.println("TRUE");
             loadResearchData();
-            System.out.println("Research state: "+_researchData.getCurrentState());
             if(_researchData.getCurrentState().equals(ResearchState.STARTED)) {
-                System.out.println("Research state check... STARTED");
-                System.out.println("Perfofming research termination...");
                 String stateFile = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" +ConfigurationService.getInstance().getResourcesConfiguration().getResearchStateFile();
                 //Terminate screen sessions
                 for(int i=0; i<_researchData.getRelatedScreensCount(); i++) {

@@ -1,7 +1,7 @@
 package research.m;
 
 /**
- *
+ * Dozwolone statusy badań.
  * @author mrkaczor
  */
 public enum ResearchState {

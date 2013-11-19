@@ -12,7 +12,7 @@ import server.c.Server;
 import server.m.Console;
 
 /**
- *
+ * Serwis pozwalający na zarządzanie danymi hostów.
  * @author Mateusz
  */
 public class HostsService {
@@ -40,6 +40,10 @@ public class HostsService {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
+    /**
+     * Powoduje wczytanie listy adresów IP do przeprowadzenia badań spod skonfigurowanej w ustawieniach ścierzki.
+     * @return true, jeżeli pomyślnie udało się wczytać dane serwerów, false w przeciwnym wypadku
+     */
     public boolean loadServersData() {
         String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
         if(filePath != null && !filePath.equals("")) {
@@ -64,6 +68,13 @@ public class HostsService {
         return false;
     }
 
+    /**
+     * Generuje komendę odpowiedzialną za realizację pomiarów na zdalnym serwerze dla pojedynczego,
+     * podanego adresu IP.
+     * @param IPAddress adres IP, dla którego mają zostać przeprowadzone pomiary
+     * @param timeout maksymalny czas trwania pomiaru, po którym zostanie ono przerwane
+     * @return polecenie konsolowe do wykonania na zdalnym serwerze
+     */
     public String generateIPLookupCommand(String IPAddress, int timeout) {
         ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
         String geoIP = config.getGeoIPPath();
@@ -89,6 +100,10 @@ public class HostsService {
         }
     }
 
+    /**
+     * Zwraca dane hostów 
+     * @return 
+     */
     public HostsHolder getHostsData() {
         return _hosts;
     }
