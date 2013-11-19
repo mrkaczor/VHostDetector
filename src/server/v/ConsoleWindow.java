@@ -11,7 +11,7 @@ import server.m.Console;
 import server.m.LogMessage;
 
 /**
- *
+ * Widok konsoli.
  * @author mrkaczor
  */
 public class ConsoleWindow extends javax.swing.JDialog {
@@ -19,7 +19,7 @@ public class ConsoleWindow extends javax.swing.JDialog {
     private int _cleanIndex;
     
     /**
-     * Creates new form ServerWindow
+     * Tworzy nowy widok zawierający konsolę systemową.
      */
     public ConsoleWindow() {
         super(MainWindow.getInstance(), false);
@@ -51,6 +51,9 @@ public class ConsoleWindow extends javax.swing.JDialog {
         return message==null || message.equals("");
     }
 
+    /**
+     * Powoduje odświerzenie widoku konsoli (w szczególności wyświetlenie wszystkich przesłanych dotychczas logów).
+     */
     public void refreshConsole() {
         List<LogMessage> logs = Server.getInstance().console().getLogs();
         logs = logs.subList(_cleanIndex, logs.size());

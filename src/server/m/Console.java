@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- *
+ * Konsola przechowująca wszystkie logi systemu (w tym odpowiedzi zdalnego serwera).
  * @author mrkaczor
  */
 public class Console {
@@ -18,7 +18,12 @@ public class Console {
     public Console() {
         _logs = new ArrayList<>();
     }
-    
+
+    /**
+     * Dodaje (na określonym poziomie) nową wiadomość do konsoli.
+     * @param level poziom, na którym ma być zalogowana wiadomość
+     * @param log treść wiadomości
+     */
     public void log(int level, String log) {
         if(level == ERROR || level == MESSAGE || level == SYSTEM) {
             _logs.add(new LogMessage(Calendar.getInstance().getTime(), level, log));
@@ -26,11 +31,19 @@ public class Console {
             _logs.add(new LogMessage(Calendar.getInstance().getTime(), Console.MESSAGE, log));
         }
     }
-    
+
+    /**
+     * Zwraca wszystkie logi zapisane na konsoli.
+     * @return logi zawarte w konsoli
+     */
     public List<LogMessage> getLogs() {
         return _logs;
     }
-    
+
+    /**
+     * Zwraca całkowitą ilość logów zapisanych na konsoli.
+     * @return ilość logów zapisanych na konsoli
+     */
     public int logCount() {
         return _logs.size();
     }
