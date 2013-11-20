@@ -11,7 +11,7 @@ import javax.swing.JFileChooser;
 import server.c.Server;
 
 /**
- *
+ * Okno wprowadzania i edycji konfiguracji zasobów zewnętrznych.
  * @author mrkaczor
  */
 public class ResourceConfigurationWindow extends JDialog {
@@ -22,10 +22,10 @@ public class ResourceConfigurationWindow extends JDialog {
      * Creates new form ResourceConfigurationWindow
      */
     public ResourceConfigurationWindow() {
-        super(MainWindow.getInstance(), "Ustawienia", true);
+        super(MainWindow.getInstance(), "Ustawienia zasobów", true);
         initComponents();
     }
-    
+
     private void refreshComponents() {
         boolean connectionState = Server.getInstance().isConnected();
         
@@ -33,7 +33,7 @@ public class ResourceConfigurationWindow extends JDialog {
         tfHostMapPath.setEnabled(!connectionState);
         tfResultsPath.setEnabled(!connectionState);
     }
-    
+
     private void refreshConfiguration() {
         _paths = ConfigurationService.getInstance().getResourcesConfiguration().clone();
         
@@ -42,7 +42,7 @@ public class ResourceConfigurationWindow extends JDialog {
         tfHostMapPath.setText(_paths.getHostmapPath()==null?"":_paths.getHostmapPath());
         tfResultsPath.setText(_paths.getResearchPath()==null?"":_paths.getResearchPath());
     }
-    
+
     private void updateConfiguration() {
         _paths.setHostsListFilePath(tfIPListPath.getText());
         _paths.setGeoIPPath(tfGeoIPPath.getText());

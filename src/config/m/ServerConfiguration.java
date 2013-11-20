@@ -1,7 +1,7 @@
 package config.m;
 
 /**
- *
+ * Konfiguracja połączenia z serwerem.
  * @author mrkaczor
  */
 public class ServerConfiguration implements Cloneable {
@@ -12,54 +12,106 @@ public class ServerConfiguration implements Cloneable {
     private AuthenticationMode _authMode;
     private String _keyPath;
 
+    /**
+     * Ustawia nazwę aktualnej konfiguracji (połączenia z serwerem).
+     * @param name nazwa aktualnej konfiguracji
+     */
     public void setName(String name) {
         this._name = name;
     }
 
+    /**
+     * Ustawia nazwę (adres) hosta serwera.
+     * @param host nazwa (adres) hosta serwera
+     */
     public void setHost(String host) {
         this._host = host;
     }
 
+    /**
+     * Ustawia login użytkownika do uwierzytelnienia na serwerze.
+     * @param login login użytkownika na serwerze
+     */
     public void setLogin(String login) {
         this._login = login;
     }
 
+    /**
+     * Ustawia hasło użytkownika lub klucza (w zależności od wyboru sposobu uwierzytelnienia).
+     * @param password hasło użytkownika/klucza
+     */
     public void setPassword(String password) {
         this._password = password;
     }
-    
+
+    /**
+     * Ustawia sposób uwierzytelnienia użytkownika na serwerze.
+     * @param mode sposób uwierzytelnienia na serwerze
+     */
     public void setAuthenticationMode(AuthenticationMode mode) {
         _authMode = mode;
     }
 
+    /**
+     * Ustawie ścieżkę do pliku zawierającego klucz użytkownika do uwierzytelnienia na serwerze.
+     * @param keyPath ścieżka do pliku klucza użytkownika
+     */
     public void setKeyPath(String keyPath) {
         this._keyPath = keyPath;
     }
 
+    /**
+     * Zwraca nazwę aktualnej konfiguracji (serwera).
+     * @return nazwa konfiguracji (serwera)
+     */
     public String getName() {
         return _name;
     }
 
+    /**
+     * Zwraca nazwę (adres) hosta serwera.
+     * @return nazwa (adres) hosta serwera
+     */
     public String getHost() {
         return _host;
     }
 
+    /**
+     * Zwraca login użytkownika, używany do uwierzytelnienia na serwerze.
+     * @return nazwa użytkownika
+     */
     public String getLogin() {
         return _login;
     }
 
+    /**
+     * Zwraca hasło użytkownika lub klucza (w zależności od wyboru sposobu uwierzytelnienia na serwerze).
+     * @return hasło użytkownika lub klucza
+     */
     public String getPassword() {
         return _password;
     }
-    
+
+    /**
+     * Zwraca sposób uwierzytelnienia użytkownika na serwerze.
+     * @return sposób uwierzytelnienia na serwerze
+     */
     public AuthenticationMode getAuthenticationMode() {
         return _authMode;
     }
 
+    /**
+     * Zwraca ścieżkę do pliku klucza użytkownika, używanego do uwierzytelnienia na serwerze.
+     * @return ścieżka do pliku klucza użytkownika
+     */
     public String getKeyPath() {
         return _keyPath;
     }
 
+    /**
+     * Zwraca informację, czy wprowadzona konfiguracja połączenia jest prawidłowa.
+     * @return true, jeżeli konfiguracja jest prawidłowa, false w przeciwnym wypadku
+     */
     public boolean isValid() {
         if(_host!=null && !_host.equals("") && _password!=null && !_password.equals("")) {
             if(_authMode.equals(AuthenticationMode.PASSWORD) && _login!=null && !_login.equals("")) {

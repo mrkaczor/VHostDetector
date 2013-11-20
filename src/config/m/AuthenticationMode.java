@@ -1,7 +1,7 @@
 package config.m;
 
 /**
-  Class providing all available authentication modes to server instance.
+ * Dostępne metody uwierzytelniania na serwerze zdalnym.
  * @author mrkaczor
  */
 public enum AuthenticationMode {

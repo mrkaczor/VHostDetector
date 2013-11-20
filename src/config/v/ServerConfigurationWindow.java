@@ -12,7 +12,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 
 /**
- *
+ * Okno wprowadzania i edycji konfiguracji połączenia z serwerem.
  * @author mrkaczor
  */
 public class ServerConfigurationWindow extends JDialog {
@@ -24,7 +24,7 @@ public class ServerConfigurationWindow extends JDialog {
      * Creates new form ServerConfigurationWindow
      */
     public ServerConfigurationWindow() {
-        super(MainWindow.getInstance(), true);
+        super(MainWindow.getInstance(), "Ustawienia połączenia", true);
         initComponents();
     }
     // </editor-fold>
