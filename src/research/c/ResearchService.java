@@ -285,6 +285,37 @@ public class ResearchService {
             }
         }
     }
+    
+    public HostsHolder gatherResearchResults(){
+        HostsHolder result = new HostsHolder();
+        
+        ResourcesConfiguration config = ConfigurationService.getInstance().getResourcesConfiguration();
+        String results = config.getResearchPath();
+        String completed = config.getCompletionListFile();
+        
+        String readHostList = "cat " + results + "/" + completed;
+        Server.getInstance().executeCommand(readHostList, false);
+        List<String> hostsList = Server.getInstance().readOutputBuffer();
+        
+        for(String host: hostsList){
+            HostModel hostModel = new HostModel(host);
+            
+            String readHostResults = "cat " + results + "/" + host;
+            Server.getInstance().executeCommand(readHostResults, false);
+            List<String> hostResults = Server.getInstance().readOutputBuffer();
+            
+            hostModel.setCountryCode(hostResults.get(0));
+            hostModel.setCountryName(hostResults.get(1));
+            for(String resultLine: hostResults){
+                if(resultLine.contains("Found new")){
+                    hostModel.addVHost(resultLine.substring(resultLine.lastIndexOf(" ")));
+                }
+            }
+            result.addHost(hostModel);
+        }
+        
+        return result;
+    }
     // </editor-fold>
 
 }

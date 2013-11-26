@@ -10,12 +10,18 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import research.c.ResearchService;
+import research.m.HostModel;
+import research.m.HostsHolder;
 import research.m.ResearchData;
 import research.m.ResearchState;
 import server.c.Server;
+import server.m.Console;
+import utils.Tuple;
 
 /**
  *
@@ -109,6 +115,12 @@ public class MainWindow extends JFrame {
             miStartStopResearch.setEnabled(connectionState);
             miResearchConfiguration.setEnabled(connectionState);
         }
+        
+        if(researchState == ResearchState.FINISHED){
+            miGatherReasearchData.setEnabled(true);
+        }else{
+            miGatherReasearchData.setEnabled(false);
+        }
         //END-MENU
         
         //MAIN_PANEL
@@ -190,6 +202,8 @@ public class MainWindow extends JFrame {
         miResearchConfiguration = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         miRefreshResearchState = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        miGatherReasearchData = new javax.swing.JCheckBoxMenuItem();
 
         pResearchDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Badania"));
         pResearchDetails.setMinimumSize(new java.awt.Dimension(380, 140));
@@ -299,10 +313,10 @@ public class MainWindow extends JFrame {
         setTitle("VHostDetector v1.0");
         setMinimumSize(new java.awt.Dimension(420, 260));
         addWindowFocusListener(new java.awt.event.WindowFocusListener() {
-            public void windowLostFocus(java.awt.event.WindowEvent evt) {
-            }
             public void windowGainedFocus(java.awt.event.WindowEvent evt) {
                 formWindowGainedFocus(evt);
+            }
+            public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
         });
 
@@ -382,6 +396,17 @@ public class MainWindow extends JFrame {
             }
         });
         mReasearch.add(miRefreshResearchState);
+        mReasearch.add(jSeparator2);
+
+        miGatherReasearchData.setSelected(true);
+        miGatherReasearchData.setText("Zbierz wyniki");
+        miGatherReasearchData.setEnabled(false);
+        miGatherReasearchData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miGatherReasearchDataActionPerformed(evt);
+            }
+        });
+        mReasearch.add(miGatherReasearchData);
 
         jMenu.add(mReasearch);
 
@@ -481,10 +506,43 @@ public class MainWindow extends JFrame {
         refreshComponents();
     }//GEN-LAST:event_miRefreshResearchStateActionPerformed
 
+    private void miGatherReasearchDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miGatherReasearchDataActionPerformed
+        // TODO add your handling code here:
+        HostsHolder hosts = ResearchService.getInstance().gatherResearchResults();
+        List<Tuple<String, Double, Integer>> avg = new LinkedList<>();
+        
+        for(HostModel host: hosts.getHosts()){
+                int index = -1;
+            for(Tuple<String, Double, Integer> a: avg){
+                if(a.item1.equals(host.getCountryCode())){
+                    index = avg.indexOf(a);
+                    break;
+                }
+            }
+            
+            if(index != -1){
+                for(Tuple<String, Double, Integer> a: avg){
+                    
+                }
+                Tuple<String, Double, Integer> oldTuple = avg.get(index);
+                Tuple<String, Double, Integer> newTuple = new Tuple<>(host.getCountryCode(),
+                        (oldTuple.item2*oldTuple.item3+host.getDiscoveredVHosts().size())/(oldTuple.item3+1),
+                        oldTuple.item3+1);
+                avg.set(index, newTuple);
+            }else{
+                avg.add(new Tuple<>(host.getCountryCode(), 1.*host.getDiscoveredVHosts().size(), 1));
+            }
+        }
+        for(Tuple<String, Double, Integer> a: avg){
+            Server.getInstance().log(Console.MESSAGE, a.item1 + ": " + a.item3 + " => " + a.item2, true);
+        }
+    }//GEN-LAST:event_miGatherReasearchDataActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar jMenu;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JLabel lApplicationName;
     private javax.swing.JLabel lResearchEndDate;
     private javax.swing.JLabel lResearchEndDateValue;
@@ -500,6 +558,7 @@ public class MainWindow extends JFrame {
     private javax.swing.JPopupMenu.Separator mServerSeparator;
     private javax.swing.JMenuItem miConnection;
     private javax.swing.JMenuItem miExit;
+    private javax.swing.JCheckBoxMenuItem miGatherReasearchData;
     private javax.swing.JMenuItem miRefreshResearchState;
     private javax.swing.JMenuItem miResearchConfiguration;
     private javax.swing.JMenuItem miResourceConfiguration;
