@@ -4,7 +4,6 @@ import config.c.ConfigurationService;
 import server.v.ConsoleWindow;
 import config.v.ResourceConfigurationWindow;
 import config.v.ServerConfigurationWindow;
-import research.c.HostsService;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
@@ -21,6 +20,7 @@ import research.m.ResearchData;
 import research.m.ResearchState;
 import server.c.Server;
 import server.m.Console;
+import tools.v.IPGeneratorWindow;
 import utils.Tuple;
 
 /**
@@ -33,6 +33,7 @@ public class MainWindow extends JFrame {
     private ConsoleWindow _serverDetails;
     private ResourceConfigurationWindow _resourceConfig;
     private ServerConfigurationWindow _serverConfig;
+    private IPGeneratorWindow _IPGenerator;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
@@ -53,6 +54,7 @@ public class MainWindow extends JFrame {
         _serverDetails = new ConsoleWindow();
         _resourceConfig = new ResourceConfigurationWindow();
         _serverConfig = new ServerConfigurationWindow();
+        _IPGenerator = new IPGeneratorWindow();
         WindowAdapter wa = new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {
@@ -204,6 +206,8 @@ public class MainWindow extends JFrame {
         miRefreshResearchState = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         miGatherReasearchData = new javax.swing.JCheckBoxMenuItem();
+        mTools = new javax.swing.JMenu();
+        miIPGenerator = new javax.swing.JMenuItem();
 
         pResearchDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Badania"));
         pResearchDetails.setMinimumSize(new java.awt.Dimension(380, 140));
@@ -410,6 +414,18 @@ public class MainWindow extends JFrame {
 
         jMenu.add(mReasearch);
 
+        mTools.setText("Narzędzia");
+
+        miIPGenerator.setText("Generator IP");
+        miIPGenerator.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miIPGeneratorActionPerformed(evt);
+            }
+        });
+        mTools.add(miIPGenerator);
+
+        jMenu.add(mTools);
+
         setJMenuBar(jMenu);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -538,6 +554,13 @@ public class MainWindow extends JFrame {
         }
     }//GEN-LAST:event_miGatherReasearchDataActionPerformed
 
+    private void miIPGeneratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miIPGeneratorActionPerformed
+        if(_IPGenerator == null) {
+            _IPGenerator = new IPGeneratorWindow();
+        }
+        _IPGenerator.setVisible(true);
+    }//GEN-LAST:event_miIPGeneratorActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar jMenu;
     private javax.swing.JScrollPane jScrollPane1;
@@ -556,9 +579,11 @@ public class MainWindow extends JFrame {
     private javax.swing.JMenu mReasearch;
     private javax.swing.JMenu mServer;
     private javax.swing.JPopupMenu.Separator mServerSeparator;
+    private javax.swing.JMenu mTools;
     private javax.swing.JMenuItem miConnection;
     private javax.swing.JMenuItem miExit;
     private javax.swing.JCheckBoxMenuItem miGatherReasearchData;
+    private javax.swing.JMenuItem miIPGenerator;
     private javax.swing.JMenuItem miRefreshResearchState;
     private javax.swing.JMenuItem miResearchConfiguration;
     private javax.swing.JMenuItem miResourceConfiguration;
