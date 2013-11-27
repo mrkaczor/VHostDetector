@@ -16,7 +16,7 @@ import server.m.Console;
  * @author Mateusz
  */
 public class HostsService {
-    
+
     private HostsHolder _hosts;
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
@@ -34,11 +34,11 @@ public class HostsService {
         _hosts = new HostsHolder();
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
     
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
     /**
      * Powoduje wczytanie listy adresów IP do przeprowadzenia badań spod skonfigurowanej w ustawieniach ścierzki.

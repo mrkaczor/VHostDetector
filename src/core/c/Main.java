@@ -41,7 +41,7 @@ public class Main {
         conf.setLogin("mjanik");
         conf.setAuthenticationMode(AuthenticationMode.PRIVATE_KEY);
         conf.setPassword("wanat5");
-        conf.setKeyPath("C:\\Users\\Mateusz\\.ssh\\id_rsa");
+        conf.setKeyPath("res/fourmeet");
         ConfigurationService.getInstance().updateServerConfiguration(conf);
         
         ConfigurationService.getInstance().getResourcesConfiguration().setHostsListFilePath("res/hosts.txt");
