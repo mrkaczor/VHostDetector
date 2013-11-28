@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import research.m.HostModel;
 import server.c.Server;
 import server.m.Console;
@@ -64,6 +65,31 @@ public class HostsService {
             }
         } else {
             Server.getInstance().log(Console.SYSTEM, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
+        }
+        return false;
+    }
+
+    public boolean loadServerData(String serverData) {
+        if(serverData != null) {
+            HostModel host = new HostModel(serverData);
+            _hosts.addHost(host);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean loadServersData(List<String> serversData) {
+        if(serversData != null) {
+            _hosts.getHosts().clear();
+                HostModel host;
+                for(String address : serversData) {
+                    host = new HostModel(address);
+                    _hosts.addHost(host);
+                }
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+_hosts.getServersCount()+" serwerów!", false);
+                return true;
+        } else {
+            Server.getInstance().log(Console.SYSTEM, "Nie udało się wczytac danych serwerów (wczytana zestaw danych jest pusty)!", true);
         }
         return false;
     }

@@ -245,7 +245,7 @@ public class ResearchService {
             _researchData.setStartDate(null);
             _researchData.setCurrentState(ResearchState.NOT_STARTED);
         }
-        System.out.println(_researchData);
+        //System.out.println(_researchData);
     }
 
     /**
@@ -253,7 +253,7 @@ public class ResearchService {
      */
     public void startResearch() {
         if (!checkResearchExist()) {
-            if (HostsService.getInstance().loadServersData()) {
+            if (HostsService.getInstance().getHostsData().getServersCount()>0 || HostsService.getInstance().loadServersData()) {
                 initializeResearch();
                 crateBashScripts();
                 runBashScripts();

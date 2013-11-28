@@ -155,6 +155,10 @@ public class MainWindow extends JFrame {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Object PUBLIC methods">
+    public IPGeneratorWindow getIPGenerator() {
+    	return _IPGenerator;
+    }
+    
     @Override
     public void setVisible(boolean visibility) {
         refreshComponents();
