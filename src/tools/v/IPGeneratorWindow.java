@@ -7,17 +7,15 @@ import java.io.File;
 import core.v.MainWindow;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
 
-import javax.print.attribute.standard.PDLOverrideSupported;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import research.c.ResearchService;
 import research.m.ResearchState;
-import server.c.Server;
 
 import tools.c.IPGenerator;
 import tools.m.IPRange;
+import utils.Utils;
 
 /**
  *
@@ -33,9 +31,8 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
 	private static final int DATA_EXPORT = 5;
 	
 	private int _currentState;
-	private int _progressCurrent;
-	private int _progressCurrentGoal;
-        private long _progressStep;
+	private long _progressGoal;
+        private long _progressCurrent;
         private int _progressStepSize;
         private Thread _currentTask;
         private boolean _dataSaved;
@@ -70,28 +67,21 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }
 
     private void closeGenerator() {
-        int choice = 0;
-        if(!_dataSaved) {
-            Object[] opt = {"Zamknij", "Anuluj"};
-            String sMessage = "Zamknięcie generatora spowoduje utratę dotychczas wczytanych/wygenerowanych informacji!";
-            choice = JOptionPane.showOptionDialog(null, sMessage, "Kończenie pracy generatora", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opt, null);
+        if(_currentState == RANGES_LOADING || _currentState == ADDRESSES_GENERATING || _currentState == DATA_EXPORT) {
+            JOptionPane.showMessageDialog(null, "Nie można zakończyć pracy generatora ponieważ wykonuje on aktualnie operacje na danych!\n"
+                    + "Zakończ aktywne operacje aby wyłączyć generator.", "Kończenie pracy generatora", JOptionPane.ERROR_MESSAGE);
+        } else {
+            int choice = 0;
+            if(!_dataSaved && _currentState == ADDRESSES_GENERATED) {
+                Object[] opt = {"Zamknij", "Anuluj"};
+                String sMessage = "Zamknięcie generatora spowoduje utratę dotychczas wczytanych/wygenerowanych informacji!";
+                choice = JOptionPane.showOptionDialog(null, sMessage, "Kończenie pracy generatora", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, opt, null);
+            }
+            if(choice == 0) {
+                clearData();
+                this.dispose();
+            }
         }
-        if(choice == 0) {
-            clearData();
-            this.dispose();
-        }
-    }
-
-    private String formatLongNumber(long number) {
-    	String num = Long.toString(number);
-    	String result = "";
-    	for(int i=0; i<num.length(); i++) {
-    		result = num.charAt(num.length()-i-1) + result;
-    		if((i+1)%3==0 && i!=num.length()-1) {
-    			result = " " + result;
-    		}
-    	}
-    	return result;
     }
 
     private void refreshComponents() {
@@ -123,9 +113,9 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                 bAction.setText("Wyczyść");
                 break;
             case DATA_EXPORT:
-                pInitialData.add(pSummaryData);
+                pInitialData.add(pInitialDataLoading);
                 pbActionProgress.setVisible(true);
-                bAction.setText("Wyczyść");
+                bAction.setText("Zatrzymaj");
                 bAction.setEnabled(false);
                 break;
     	}
@@ -134,16 +124,18 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }
 
     private void resetCurrentTask(int newTaskSteps) {
-    	_progressStep = 0;
+    	_progressCurrent = 0;
+        _progressGoal = newTaskSteps;
         _progressStepSize = 1;
-    	pbActionProgress.setMaximum(newTaskSteps);
+    	pbActionProgress.setMaximum((int)_progressGoal);
     	pbActionProgress.setValue(0);
     }
 
     private void resetCurrentTask(long newTaskSteps) {
-    	_progressStep = 0;
+    	_progressCurrent = 0;
+        _progressGoal = newTaskSteps;
         _progressStepSize = scaleTask(newTaskSteps);
-    	pbActionProgress.setMaximum((int)(newTaskSteps / _progressStepSize));
+    	pbActionProgress.setMaximum((int)(_progressGoal / _progressStepSize));
     	pbActionProgress.setValue(0);
     }
 
@@ -161,13 +153,9 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }
 
     public void moveProgress() {
-        if (_progressStep < pbActionProgress.getMaximum() * _progressStepSize) {
-            pbActionProgress.setValue((int)((++_progressStep)/_progressStepSize));
-            if (_progressCurrentGoal > 0 && _progressCurrent < _progressCurrentGoal) {
-                lLoadingStatusBottom.setText("(" + (++_progressCurrent) + "/" + _progressCurrentGoal + ")");
-            } else {
-                lLoadingStatusBottom.setText("(" + _progressStep + "/" + pbActionProgress.getMaximum()*_progressStepSize + ")");
-            }
+        if (_progressCurrent < _progressGoal && _progressCurrent%_progressStepSize == 0) {
+            pbActionProgress.setValue(pbActionProgress.getValue()+1);
+            lLoadingStatusBottom.setText("(" + ++_progressCurrent + "/" + _progressGoal + ")");
         } else {
             pbActionProgress.setValue(pbActionProgress.getMaximum());
         }
@@ -194,7 +182,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
         lAddresses = new javax.swing.JLabel();
         lAddressesValue = new javax.swing.JLabel();
         bSaveToFile = new javax.swing.JButton();
-        bLoadToResearch = new javax.swing.JButton();
+        bValidateData = new javax.swing.JButton();
         lTitle = new javax.swing.JLabel();
         pInitialData = new javax.swing.JPanel();
         pInitialDataDetails = new javax.swing.JPanel();
@@ -277,10 +265,11 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
             }
         });
 
-        bLoadToResearch.setText("Wczytaj do badań");
-        bLoadToResearch.addActionListener(new java.awt.event.ActionListener() {
+        bValidateData.setText("Przekaż do walidacji");
+        bValidateData.setActionCommand("Zwaliduj dane");
+        bValidateData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bLoadToResearchActionPerformed(evt);
+                bValidateDataActionPerformed(evt);
             }
         });
 
@@ -297,7 +286,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                 .addContainerGap(31, Short.MAX_VALUE)
                 .addComponent(bSaveToFile, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(bLoadToResearch, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(bValidateData, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(31, Short.MAX_VALUE))
         );
         pSummaryDataLayout.setVerticalGroup(
@@ -310,7 +299,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(pSummaryDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bSaveToFile)
-                    .addComponent(bLoadToResearch))
+                    .addComponent(bValidateData))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
@@ -418,8 +407,8 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                         .addComponent(pbActionProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(bAction, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addComponent(bAction, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pack();
@@ -430,9 +419,9 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
         fileChooser.setMultiSelectionEnabled(true);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
-        	final File[] files = fileChooser.getSelectedFiles();
-        	lFilesValue.setText(""+files.length);
-            
+            final File[] files = fileChooser.getSelectedFiles();
+            lFilesValue.setText("" + files.length);
+
             _currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -455,7 +444,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                         addresses += IPGenerator.getInstance().calculatePossibleAddresses(range);
                         moveProgress();
                     }
-                    lAddressesCountValue.setText(formatLongNumber(addresses));
+                    lAddressesCountValue.setText(Utils.formatLongNumber(addresses));
                     switchState(RANGES_LOADED);
                 }
             });
@@ -472,8 +461,12 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                         switchState(ADDRESSES_GENERATING);
                         lLoadingStatusTop.setText("Generowanie adresów IP...");
                         resetCurrentTask(IPGenerator.getInstance().getRanges().size());
-                        long addresses = IPGenerator.getInstance().rangesToIPList();
-                        lAddressesValue.setText(formatLongNumber(addresses));
+                        boolean buffer = false;
+                        if(Long.parseLong(lAddressesCountValue.getText().replaceAll(" ", "")) > Short.MAX_VALUE) {
+                            buffer = true;
+                        }
+                        long addresses = IPGenerator.getInstance().rangesToIPList(buffer);
+                        lAddressesValue.setText(Utils.formatLongNumber(addresses));
                         switchState(ADDRESSES_GENERATED);
                     }
                 });
@@ -482,6 +475,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
             
             case ADDRESSES_GENERATING:
                 _currentTask.stop();
+                lAddressesValue.setText(Utils.formatLongNumber(IPGenerator.getInstance().getAddressesCount()));
                 switchState(ADDRESSES_GENERATED);
                 break;
             
@@ -492,51 +486,39 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }//GEN-LAST:event_bActionActionPerformed
 
     private void bSaveToFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveToFileActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
+        final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
-            if(IPGenerator.getInstance().exportAddresses(fileChooser.getSelectedFile())) {
-                _dataSaved = true;
-                JOptionPane.showMessageDialog(null, "Pomyślnie wyeksportowano wygenerowane dane do pliku!", "Eksport danych", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Wystąpił błąd, w wyniku którego nie udało się zapisać wygenerowanych danych do pliku!", "Eksport danych", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }//GEN-LAST:event_bSaveToFileActionPerformed
-
-    private void bLoadToResearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLoadToResearchActionPerformed
-        ResearchService.getInstance().loadResearchData();
-        ResearchState state = ResearchService.getInstance().getResearchData().getCurrentState();
-        if(state == ResearchState.NOT_STARTED) {
-            
             _currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     switchState(DATA_EXPORT);
-                    lLoadingStatusTop.setText("Wczytywanie adresów IP do badań...");
+                    lLoadingStatusTop.setText("Eksport adresów IP do pliku...");
                     long addresses = IPGenerator.getInstance().getAddressesCount();
                     resetCurrentTask(addresses);
-                    if(IPGenerator.getInstance().transferAddressesToReaserch()) {
-                        JOptionPane.showMessageDialog(null, "Pomyślnie wczytano wygenerowane dane do badań!", "Inicjalizacja badań", JOptionPane.INFORMATION_MESSAGE);
+                    if(IPGenerator.getInstance().exportAddresses(fileChooser.getSelectedFile())) {
                         _dataSaved = true;
+                        JOptionPane.showMessageDialog(null, "Pomyślnie wyeksportowano wygenerowane dane do pliku!", "Eksport danych", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Nie udało się wczytać wygenerowanych danych do badań!", "Inicjalizacja badań", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Wystąpił błąd, w wyniku którego nie udało się zapisać wygenerowanych danych do pliku!", "Eksport danych", JOptionPane.ERROR_MESSAGE);
                     }
                     switchState(ADDRESSES_GENERATED);
                 }
             });
             _currentTask.start();
-        } else {
-            JOptionPane.showMessageDialog(null, "Nie można wczytać danych do badań, ponieważ zostały już one uruchomione/zakończone!", "Inicjalizacja badań", JOptionPane.WARNING_MESSAGE);
         }
-    }//GEN-LAST:event_bLoadToResearchActionPerformed
+    }//GEN-LAST:event_bSaveToFileActionPerformed
+
+    private void bValidateDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bValidateDataActionPerformed
+        
+    }//GEN-LAST:event_bValidateDataActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bAction;
     private javax.swing.JButton bLoadRanges;
-    private javax.swing.JButton bLoadToResearch;
     private javax.swing.JButton bSaveToFile;
+    private javax.swing.JButton bValidateData;
     private javax.swing.JLabel lAddresses;
     private javax.swing.JLabel lAddressesCount;
     private javax.swing.JLabel lAddressesCountValue;

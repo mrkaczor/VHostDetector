@@ -6,6 +6,18 @@ package utils;
  */
 public class Utils {
 
+    public static String formatLongNumber(long number) {
+    	String num = Long.toString(number);
+    	String result = "";
+    	for(int i=0; i<num.length(); i++) {
+    		result = num.charAt(num.length()-i-1) + result;
+    		if((i+1)%3==0 && i!=num.length()-1) {
+    			result = " " + result;
+    		}
+    	}
+    	return result;
+    }
+
     public static String formatTime(long time) {
         String sTime;
         sTime="."+time%1000;

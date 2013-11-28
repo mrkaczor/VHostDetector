@@ -57,7 +57,7 @@ public class HostsService {
                     host = new HostModel(line);
                     _hosts.addHost(host);
                 }
-                Server.getInstance().log(Console.SYSTEM, "Successfully loaded "+_hosts.getServersCount()+" servers data!", false);
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+_hosts.getServersCount()+" serwerów!", false);
                 return true;
             } catch(IOException ex) {
                 Server.getInstance().log(Console.SYSTEM, "Wystąpił błąd podczas próby wczytania danych serwerów: "+ex.getMessage(), true);
@@ -65,31 +65,6 @@ public class HostsService {
             }
         } else {
             Server.getInstance().log(Console.SYSTEM, "Nie skonfigurowano ścieżki pliku z danymi serwerów!", true);
-        }
-        return false;
-    }
-
-    public boolean loadServerData(String serverData) {
-        if(serverData != null) {
-            HostModel host = new HostModel(serverData);
-            _hosts.addHost(host);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean loadServersData(List<String> serversData) {
-        if(serversData != null) {
-            _hosts.getHosts().clear();
-                HostModel host;
-                for(String address : serversData) {
-                    host = new HostModel(address);
-                    _hosts.addHost(host);
-                }
-                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+_hosts.getServersCount()+" serwerów!", false);
-                return true;
-        } else {
-            Server.getInstance().log(Console.SYSTEM, "Nie udało się wczytac danych serwerów (wczytana zestaw danych jest pusty)!", true);
         }
         return false;
     }

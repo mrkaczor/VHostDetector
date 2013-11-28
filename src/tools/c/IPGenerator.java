@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Date;
 import research.c.HostsService;
+import research.c.ResearchService;
 import server.c.Server;
 import server.m.Console;
 import tools.m.IPAddress;
@@ -26,8 +27,11 @@ import utils.Utils;
  */
 public class IPGenerator {
 
+    public final String BUFFER_FILE = "data";
+
     private List<IPRange> _ranges;
     private List<IPAddress> _addresses;
+    File _buffer;
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
     // <editor-fold defaultstate="collapsed" desc="Singleton">
@@ -49,25 +53,36 @@ public class IPGenerator {
     public void clearData() {
         _ranges.clear();
         _addresses.clear();
-    }
-
-    public boolean transferAddressesToReaserch() {
-        if(_addresses != null && !_addresses.isEmpty()) {
-            Date start = new Date();
-            for(IPAddress address : _addresses) {
-                if(!HostsService.getInstance().loadServerData(address.toString())) {
-                    return false;
+        if(_buffer != null) {
+            if(!_buffer.delete()) {
+                try {
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(_buffer));
+                    bw.write("Please remove this file manually!");
+                    bw.close();
+                } catch (IOException ex) {
+                    Server.getInstance().log(Console.ERROR, "Failed to delete temporary files used by IP Generator! Please try to delete it manually from directory '"
+                        + _buffer.getAbsolutePath() + "' to avoid losing memory space!", true);
                 }
-                MainWindow.getInstance().getIPGenerator().moveProgress();
             }
-            System.out.println("Transferred addresses in:\t"+Utils.formatTime(new Date().getTime()-start.getTime()));
-            return true;
+            _buffer = null;
         }
-        return false;
     }
 
     public long getAddressesCount() {
-        return _addresses.size();
+        if(_buffer == null) {
+            return _addresses.size();
+        } else {
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(_buffer));
+                int addresses = 0;
+                while(br.readLine()!=null) {
+                    addresses++;
+                }
+                return addresses;
+            } catch (IOException ex) {
+                return 0;
+            }
+        }
     }
 
     public List<IPRange> getRanges() {
@@ -80,16 +95,50 @@ public class IPGenerator {
 
     public boolean exportAddresses(File file) {
         BufferedWriter bw;
-        try {
-            bw = new BufferedWriter(new FileWriter(file));
-            for(IPAddress address : _addresses) {
-                bw.write(address + "\n");
+        long time = 0;
+        if(_buffer == null && _addresses.size() > 0) {
+            try {
+                bw = new BufferedWriter(new FileWriter(file));
+                Date start = new Date();
+                for(IPAddress address : _addresses) {
+                    bw.write(address + "\n");
+                    MainWindow.getInstance().getIPGenerator().moveProgress();
+                }
+                time = new Date().getTime() - start.getTime();
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wyeksportowano " + _addresses.size() + " adresów IP w czasie "+Utils.formatTime(time)+"!", false);
+                bw.close();
+            } catch (IOException ex) {
+                Server.getInstance().log(Console.SYSTEM, "Nie udało się wyeksportować danych adresów IP do pliku z powodu błędu:\n" + ex.getMessage(), false);
+                return false;
             }
-            bw.close();
-        } catch (IOException ex) {
-            Server.getInstance().log(Console.SYSTEM, "Nie udało się wyeksportować danych adresów IP do pliku z powodu błędu:\n" + ex.getMessage(), false);
-            return false;
+        } else if(_buffer != null) {
+            BufferedReader br;
+            String line;
+            int count = 0;
+            Date start = new Date();
+            if (!_buffer.renameTo(file)) {
+                try {
+                    br = new BufferedReader(new FileReader(_buffer));
+                    bw = new BufferedWriter(new FileWriter(file));
+                    while((line=br.readLine()) != null) {
+                        bw.write(line);
+                        count++;
+                        MainWindow.getInstance().getIPGenerator().moveProgress();
+                    }
+                    bw.close();
+                } catch (IOException ex) {
+                    Server.getInstance().log(Console.SYSTEM, "Nie udało się wyeksportować danych adresów IP do pliku z powodu błędu:\n" + ex.getMessage(), false);
+                    return false;
+                }
+            }
+            time = new Date().getTime() - start.getTime();
+            if(count > 0) {
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wyeksportowano " + count + " adresów IP w czasie " + Utils.formatTime(time) + "!", false);
+            } else {
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wyeksportowano dane do pliku w czasie "+Utils.formatTime(time)+"!", false);
+            }
         }
+        System.out.println("Exported addresses in:\t" + Utils.formatTime(time));
         return true;
     }
 
@@ -140,15 +189,14 @@ public class IPGenerator {
         List<IPAddress> addresses = new ArrayList<>();
 
         IPAddress base = range.getBaseAddress();
-
         //Should be multi-threaded !!
-        List<IPAddress> temp_addresses = generateIPAddressesForOctet(base, 1, range.getOctetMaxValue(1));
+        List<IPAddress> temp_addresses = generateIPAddressesForOctet(base, 1, (byte)range.getOctetMaxValue(1));
         for (IPAddress addr : temp_addresses) {
-            List<IPAddress> temp_addresses2 = generateIPAddressesForOctet(addr, 2, range.getOctetMaxValue(2));
+            List<IPAddress> temp_addresses2 = generateIPAddressesForOctet(addr, 2, (byte)range.getOctetMaxValue(2));
             for (IPAddress addr2 : temp_addresses2) {
-                List<IPAddress> temp_addresses3 = generateIPAddressesForOctet(addr2, 3, range.getOctetMaxValue(3));
+                List<IPAddress> temp_addresses3 = generateIPAddressesForOctet(addr2, 3, (byte)range.getOctetMaxValue(3));
                 for (IPAddress addr3 : temp_addresses3) {
-                    List<IPAddress> final_addresses = generateIPAddressesForOctet(addr3, 4, range.getOctetMaxValue(4));
+                    List<IPAddress> final_addresses = generateIPAddressesForOctet(addr3, 4, (byte)range.getOctetMaxValue(4));
                     for (IPAddress addr4 : final_addresses) {
                         addresses.add(addr4);
                     }
@@ -159,21 +207,38 @@ public class IPGenerator {
         return addresses;
     }
 
-    public long rangesToIPList() {
+    public long rangesToIPList(boolean buffer) {
         long addresses = 0;
         List<IPAddress> tmpList;
         if(!_ranges.isEmpty()) {
-            Server.getInstance().log(Console.SYSTEM, "Generowanie adresów IP z " + _ranges.size() + " zakresów...", false);
             _addresses.clear();
+            Server.getInstance().log(Console.SYSTEM, "Generowanie adresów IP z " + _ranges.size() + " zakresów...", false);
             Date start = new Date();
-            for(IPRange range : _ranges) {
-                tmpList = rangeToIPList(range);
-                _addresses.addAll(tmpList);
-                MainWindow.getInstance().getIPGenerator().moveProgress();
-                addresses += tmpList.size();
+            if(buffer) {
+                try {
+                    _buffer = new File(BUFFER_FILE);
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(_buffer));
+                    for (IPRange range : _ranges) {
+                        for (IPAddress address : rangeToIPList(range)) {
+                            bw.write(address + "\n");
+                            addresses++;
+                        }
+                        MainWindow.getInstance().getIPGenerator().moveProgress();
+                    }
+                    bw.close();
+                } catch (IOException ex) {
+                    Server.getInstance().log(Console.SYSTEM, "Wystąpił błąd bufora podczas generowania adresów IP!", true);
+                }
+            } else {
+                for(IPRange range : _ranges) {
+                    tmpList = rangeToIPList(range);
+                    _addresses.addAll(tmpList);
+                    MainWindow.getInstance().getIPGenerator().moveProgress();
+                    addresses += tmpList.size();
+                }
             }
             long time = new Date().getTime() - start.getTime();
-            Server.getInstance().log(Console.SYSTEM, "Pomyślnie wygenerowano " + _addresses.size() + " adresów IP z " + _ranges.size() + " zakresów w czasie "+Utils.formatTime(time)+"!", false);
+            Server.getInstance().log(Console.SYSTEM, "Pomyślnie wygenerowano " + addresses + " adresów IP z " + _ranges.size() + " zakresów w czasie "+Utils.formatTime(time)+"!", false);
             System.out.println("Generated addresses in:\t" + Utils.formatTime(time));
         } else {
             Server.getInstance().log(Console.SYSTEM, "Nie można wygenerować adresów IP, ponieważ nie zdefiniowano zakresów!", true);
@@ -181,13 +246,13 @@ public class IPGenerator {
         return addresses;
     }
     
-    private List<IPAddress> generateIPAddressesForOctet(IPAddress base, int octetId, int max) {
+    private List<IPAddress> generateIPAddressesForOctet(IPAddress base, int octetId, byte max) {
         List<IPAddress> results = new ArrayList<>();
         IPAddress temp;
         results.add(base);
-        for (int i = base.getOctet(octetId) + 1; i <= max; i++) {
+        for (int i = base.getOctet(octetId)+1 ; i <= (max & 0xFF); i++) {
             temp = base.clone();
-            temp.setOctet(octetId, i);
+            temp.setOctet(octetId, (byte)i);
             results.add(temp);
         }
         return results;

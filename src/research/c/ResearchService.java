@@ -2,6 +2,11 @@ package research.c;
 
 import config.c.ConfigurationService;
 import config.m.ResourcesConfiguration;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.List;
 import research.m.HostModel;
@@ -19,6 +24,7 @@ public class ResearchService {
 
     private final int _parallelTasks = 10;
     private final int _taskTimeout = 1000;
+    private int _initialDataSource;
 
     private ResearchData _researchData;
 
@@ -35,7 +41,7 @@ public class ResearchService {
     // </editor-fold>
 
     private ResearchService() {
-
+        
     }
     // </editor-fold>
 
@@ -178,14 +184,39 @@ public class ResearchService {
     }
 
     private void uploadServersList(String path) {
-        int count = HostsService.getInstance().getHostsData().getServersCount();
-        String command = "echo " + count + " > " + path;
-        if (Server.getInstance().executeCommand(command, false)) {
-            for (HostModel host : HostsService.getInstance().getHostsData().getHosts()) {
-                command = "echo " + host.getIPAddress() + " >> " + path;
-                Server.getInstance().executeCommand(command, false);
+        String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
+        try {
+            RandomAccessFile ra = new RandomAccessFile(new File(filePath), "rw");
+            String line;
+            //Obliczanie ilości adresów IP
+            int count = 0;
+            while (ra.readLine() != null) {
+                count++;
             }
+            ra.seek(0);
+            //
+            String command = "echo " + count + " > " + path;
+            if (Server.getInstance().executeCommand(command, true)) {
+                
+                while ((line = ra.readLine()) != null) {
+                    command = "echo " + line + " >> " + path;
+                    Server.getInstance().executeCommand(command, false);
+                }
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+count+" serwerów!", false);
+            }
+            ra.close();
+        } catch(IOException ex) {
+            Server.getInstance().log(Console.SYSTEM, "Wystąpił błąd podczas próby zuploadowania danych serwerów: "+ex.getMessage(), true);
+            System.err.println("Wystąpił błąd podczas próby zuploadowania danych serwerów:\n"+ex.getMessage());
         }
+    }
+
+    private boolean validateResearchData() {
+        String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
+        if(filePath != null && !filePath.equals("")) {
+            return true;
+        }
+        return false;
     }
     // </editor-fold>
 
@@ -253,7 +284,7 @@ public class ResearchService {
      */
     public void startResearch() {
         if (!checkResearchExist()) {
-            if (HostsService.getInstance().getHostsData().getServersCount()>0 || HostsService.getInstance().loadServersData()) {
+            if (validateResearchData()) {
                 initializeResearch();
                 crateBashScripts();
                 runBashScripts();
