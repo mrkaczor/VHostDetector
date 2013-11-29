@@ -4,9 +4,16 @@
 *.jar
 *.war
 *.ear
+
+#NetBeans
 nbproject
 build.xml
 manifest.mf
-
 build
 dist
+
+#Eclipse
+/.settings
+/bin
+/.classpath
+/.project
