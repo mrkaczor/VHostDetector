@@ -1,6 +1,7 @@
 package utils;
 
 import java.io.File;
+import java.util.Date;
 
 import javax.swing.JFileChooser;
 
@@ -38,6 +39,14 @@ public class Utils {
         time/=60;
         sTime=(time<10?"0"+time:time)+":"+sTime;
         return sTime;
+    }
+
+    public static String generateTimestamp() {
+    	return generateTimestamp("");
+    }
+
+    public static String generateTimestamp(String base) {
+    	return base+new Date().getTime();
     }
 
     public static File loadFile() {

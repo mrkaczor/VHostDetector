@@ -20,7 +20,7 @@ import utils.Utils;
  */
 public class IPValidator {
 
-    public final String BUFFER_FILE = "data";
+    public final String BUFFER_FILE = Utils.generateTimestamp()+".tmp";
 
     private int _packetsCount;
     private File _buffer;
