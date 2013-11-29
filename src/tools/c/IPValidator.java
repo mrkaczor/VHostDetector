@@ -134,7 +134,7 @@ public class IPValidator {
 
             String line;
             while ((line=reader.readLine()) != null) {
-                if(line.contains("Packets")) {
+            	if(line.contains("= "+_packetsCount+", ")) {
                     break;
                 }
             }
