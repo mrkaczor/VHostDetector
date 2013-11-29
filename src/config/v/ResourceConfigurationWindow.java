@@ -3,12 +3,15 @@ package config.v;
 import config.c.ConfigurationService;
 import config.m.ResourcesConfiguration;
 import core.v.MainWindow;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
+
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
+
 import server.c.Server;
+import utils.Utils;
 
 /**
  * Okno wprowadzania i edycji konfiguracji zasobów zewnętrznych.
@@ -63,7 +66,6 @@ public class ResourceConfigurationWindow extends JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        fileChooser = new javax.swing.JFileChooser();
         jLabel1 = new javax.swing.JLabel();
         pConnectionSettings = new javax.swing.JPanel();
         lIPListPath = new javax.swing.JLabel();
@@ -243,13 +245,9 @@ public class ResourceConfigurationWindow extends JDialog {
     }//GEN-LAST:event_bCancelActionPerformed
 
     private void bIPListPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bIPListPathActionPerformed
-        // TODO add your handling code here:
-        int returnVal = fileChooser.showOpenDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            //This is where a real application would open the file.
-            tfIPListPath.setText(file.getPath());
+        File importFile = Utils.loadFile();
+        if (importFile != null) {
+            tfIPListPath.setText(importFile.getAbsolutePath());
         } else {
             
         }
@@ -259,7 +257,6 @@ public class ResourceConfigurationWindow extends JDialog {
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bIPListPath;
     private javax.swing.JButton bSave;
-    private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lGeoIPPath;
     private javax.swing.JLabel lHostMapPath;

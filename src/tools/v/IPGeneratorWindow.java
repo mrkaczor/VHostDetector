@@ -2,20 +2,16 @@ package tools.v;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.io.File;
-
-import core.v.MainWindow;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import research.c.ResearchService;
-import research.m.ResearchState;
 
 import tools.c.IPGenerator;
 import tools.m.IPRange;
 import utils.Utils;
+import core.v.MainWindow;
 
 /**
  *
@@ -416,20 +412,17 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bLoadRangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLoadRangesActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(true);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
-            final File[] files = fileChooser.getSelectedFiles();
-            lFilesValue.setText("" + files.length);
+        final File[] importFiles = Utils.loadFiles();
+        if(importFiles != null) {
+            lFilesValue.setText("" + importFiles.length);
 
             _currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     switchState(RANGES_LOADING);
                     lLoadingStatusTop.setText("Wczytywanie zakresów adresów IP...");
-                    resetCurrentTask(files.length);
-                    int ranges = IPGenerator.getInstance().loadRanges(files);
+                    resetCurrentTask(importFiles.length);
+                    int ranges = IPGenerator.getInstance().loadRanges(importFiles);
                     lRangesValue.setText("" + ranges);
 
 //                    try {
@@ -487,10 +480,8 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
     }//GEN-LAST:event_bActionActionPerformed
 
     private void bSaveToFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveToFileActionPerformed
-        final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
+        final File exportFile = Utils.loadFile();
+        if(exportFile != null) {
             _currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -498,7 +489,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
                     lLoadingStatusTop.setText("Eksport adresów IP do pliku...");
                     long addresses = IPGenerator.getInstance().getAddressesCount();
                     resetCurrentTask(addresses);
-                    if(IPGenerator.getInstance().exportAddresses(fileChooser.getSelectedFile())) {
+                    if(IPGenerator.getInstance().exportAddresses(exportFile)) {
                         _dataSaved = true;
                         JOptionPane.showMessageDialog(null, "Pomyślnie wyeksportowano wygenerowane dane do pliku!", "Eksport danych", JOptionPane.INFORMATION_MESSAGE);
                     } else {

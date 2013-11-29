@@ -2,21 +2,15 @@ package tools.v;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.io.File;
-
-import core.v.MainWindow;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import research.c.ResearchService;
-import research.m.ResearchState;
 
-import tools.c.IPGenerator;
 import tools.c.IPValidator;
-import tools.m.IPRange;
 import utils.Utils;
+import core.v.MainWindow;
 
 /**
  *
@@ -450,10 +444,8 @@ public class IPValidatorWindow extends javax.swing.JDialog {
     }//GEN-LAST:event_bActionActionPerformed
 
     private void bSaveToFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveToFileActionPerformed
-        final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
+        final File exportFile = Utils.loadFile();
+        if(exportFile != null) {
             _currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -461,7 +453,7 @@ public class IPValidatorWindow extends javax.swing.JDialog {
                     lLoadingStatusTop.setText("Eksport adresów IP do pliku...");
                     long addresses = IPValidator.getInstance().getLoadedInitialDataCount();
                     resetCurrentTask(addresses);
-                    if(IPValidator.getInstance().exportAddresses(fileChooser.getSelectedFile())) {
+                    if(IPValidator.getInstance().exportAddresses(exportFile)) {
                         _dataSaved = true;
                         JOptionPane.showMessageDialog(null, "Pomyślnie wyeksportowano wygenerowane dane do pliku!", "Eksport danych", JOptionPane.INFORMATION_MESSAGE);
                     } else {
@@ -487,19 +479,15 @@ public class IPValidatorWindow extends javax.swing.JDialog {
     }//GEN-LAST:event_bInitializeResearchActionPerformed
 
     private void bLoadAddressesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bLoadAddressesActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        if(fileChooser.showOpenDialog(MainWindow.getInstance()) == JFileChooser.APPROVE_OPTION) {
-            final File file = fileChooser.getSelectedFile();
-
-            _currentTask = new Thread(new Runnable() {
+    	final File importFile = Utils.loadFile();
+        if(importFile != null) {
+        	_currentTask = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     switchState(ADDRESSES_LOADING);
                     lLoadingStatusTop.setText("Wczytywanie adresów IP...");
                     resetCurrentTask(-1);
-                    long addresses = IPValidator.getInstance().loadInitialAddresses(file);
+                    long addresses = IPValidator.getInstance().loadInitialAddresses(importFile);
                     lAddressesLoadedValue.setText(Utils.formatLongNumber(addresses));
                     switchState(ADDRESSES_LOADED);
                 }

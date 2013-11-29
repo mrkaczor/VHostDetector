@@ -1,10 +1,17 @@
 package utils;
 
+import java.io.File;
+
+import javax.swing.JFileChooser;
+
 /**
  *
  * @author mrkaczor
  */
 public class Utils {
+
+	private static String _lastImportPath = System.getProperty("user.dir");
+	private static final JFileChooser _fileChooser = new JFileChooser(_lastImportPath); 
 
     public static String formatLongNumber(long number) {
     	String num = Long.toString(number);
@@ -31,6 +38,28 @@ public class Utils {
         time/=60;
         sTime=(time<10?"0"+time:time)+":"+sTime;
         return sTime;
+    }
+
+    public static File loadFile() {
+    	_fileChooser.setCurrentDirectory(new File(_lastImportPath));
+    	_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    	_fileChooser.setMultiSelectionEnabled(false);
+    	if(_fileChooser.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
+    		_lastImportPath = _fileChooser.getSelectedFile().getAbsolutePath();
+    		return _fileChooser.getSelectedFile();
+    	}
+    	return null;
+    }
+
+    public static File[] loadFiles() {
+    	_fileChooser.setCurrentDirectory(new File(_lastImportPath));
+    	_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    	_fileChooser.setMultiSelectionEnabled(true);
+    	if(_fileChooser.showOpenDialog(null)==JFileChooser.APPROVE_OPTION) {
+    		_lastImportPath = _fileChooser.getSelectedFile().getAbsolutePath();
+    		return _fileChooser.getSelectedFiles();
+    	}
+    	return null;
     }
 
 }

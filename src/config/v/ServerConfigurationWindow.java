@@ -4,12 +4,15 @@ import config.c.ConfigurationService;
 import config.m.AuthenticationMode;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
+
+import utils.Utils;
 
 /**
  * Okno wprowadzania i edycji konfiguracji połączenia z serwerem.
@@ -65,7 +68,6 @@ public class ServerConfigurationWindow extends JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jFileChooser = new javax.swing.JFileChooser();
         jLabel1 = new javax.swing.JLabel();
         lServerName = new javax.swing.JLabel();
         tfServerName = new javax.swing.JTextField();
@@ -241,13 +243,9 @@ public class ServerConfigurationWindow extends JDialog {
     }//GEN-LAST:event_cbAuthenticationModeActionPerformed
 
     private void bKeyPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bKeyPathActionPerformed
-        // TODO add your handling code here:
-        int returnVal = jFileChooser.showOpenDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser.getSelectedFile();
-            //This is where a real application would open the file.
-            tfKeyPath.setText(file.getPath());
+    	File importFile = Utils.loadFile();
+        if (importFile != null) {
+            tfKeyPath.setText(importFile.getAbsolutePath());
         } else {
 
         }
@@ -268,7 +266,6 @@ public class ServerConfigurationWindow extends JDialog {
     private javax.swing.JButton bKeyPath;
     private javax.swing.JButton bSave;
     private javax.swing.JComboBox cbAuthenticationMode;
-    private javax.swing.JFileChooser jFileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lAuthenticationMode;
     private javax.swing.JLabel lHostName;
