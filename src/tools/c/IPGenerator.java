@@ -12,8 +12,6 @@ import core.v.MainWindow;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Date;
-import research.c.HostsService;
-import research.c.ResearchService;
 import server.c.Server;
 import server.m.Console;
 import tools.m.IPAddress;
@@ -121,7 +119,7 @@ public class IPGenerator {
                     br = new BufferedReader(new FileReader(_buffer));
                     bw = new BufferedWriter(new FileWriter(file));
                     while((line=br.readLine()) != null) {
-                        bw.write(line);
+                        bw.write(line + "\n");
                         count++;
                         MainWindow.getInstance().getIPGenerator().moveProgress();
                     }

@@ -129,6 +129,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
         _progressStepSize = 1;
     	pbActionProgress.setMaximum((int)_progressGoal);
     	pbActionProgress.setValue(0);
+        lLoadingStatusBottom.setText("(inicjalizacja)");
     }
 
     private void resetCurrentTask(long newTaskSteps) {
@@ -137,6 +138,7 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
         _progressStepSize = scaleTask(newTaskSteps);
     	pbActionProgress.setMaximum((int)(_progressGoal / _progressStepSize));
     	pbActionProgress.setValue(0);
+        lLoadingStatusBottom.setText("(inicjalizacja)");
     }
 
     private int scaleTask(long taskSize) {
@@ -305,7 +307,6 @@ public class IPGeneratorWindow extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(400, 250));
-        setPreferredSize(new java.awt.Dimension(450, 300));
 
         lTitle.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);

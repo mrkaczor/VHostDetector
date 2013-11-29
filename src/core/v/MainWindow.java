@@ -21,6 +21,7 @@ import research.m.ResearchState;
 import server.c.Server;
 import server.m.Console;
 import tools.v.IPGeneratorWindow;
+import tools.v.IPValidatorWindow;
 import utils.Tuple;
 
 /**
@@ -34,6 +35,7 @@ public class MainWindow extends JFrame {
     private ResourceConfigurationWindow _resourceConfig;
     private ServerConfigurationWindow _serverConfig;
     private IPGeneratorWindow _IPGenerator;
+    private IPValidatorWindow _IPValidator;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Creating object">
@@ -55,6 +57,7 @@ public class MainWindow extends JFrame {
         _resourceConfig = new ResourceConfigurationWindow();
         _serverConfig = new ServerConfigurationWindow();
         _IPGenerator = new IPGeneratorWindow();
+        _IPValidator = new IPValidatorWindow();
         WindowAdapter wa = new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {
@@ -158,7 +161,11 @@ public class MainWindow extends JFrame {
     public IPGeneratorWindow getIPGenerator() {
     	return _IPGenerator;
     }
-    
+
+    public IPValidatorWindow getIPValidator() {
+    	return _IPValidator;
+    }
+
     @Override
     public void setVisible(boolean visibility) {
         refreshComponents();
@@ -212,6 +219,7 @@ public class MainWindow extends JFrame {
         miGatherReasearchData = new javax.swing.JCheckBoxMenuItem();
         mTools = new javax.swing.JMenu();
         miIPGenerator = new javax.swing.JMenuItem();
+        miIPValidator = new javax.swing.JMenuItem();
 
         pResearchDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)), "Badania"));
         pResearchDetails.setMinimumSize(new java.awt.Dimension(380, 140));
@@ -428,6 +436,14 @@ public class MainWindow extends JFrame {
         });
         mTools.add(miIPGenerator);
 
+        miIPValidator.setText("Walidator IP");
+        miIPValidator.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miIPValidatorActionPerformed(evt);
+            }
+        });
+        mTools.add(miIPValidator);
+
         jMenu.add(mTools);
 
         setJMenuBar(jMenu);
@@ -565,6 +581,13 @@ public class MainWindow extends JFrame {
         _IPGenerator.setVisible(true);
     }//GEN-LAST:event_miIPGeneratorActionPerformed
 
+    private void miIPValidatorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miIPValidatorActionPerformed
+        if(_IPValidator == null) {
+            _IPValidator = new IPValidatorWindow();
+        }
+        _IPValidator.setVisible(true);
+    }//GEN-LAST:event_miIPValidatorActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar jMenu;
     private javax.swing.JScrollPane jScrollPane1;
@@ -588,6 +611,7 @@ public class MainWindow extends JFrame {
     private javax.swing.JMenuItem miExit;
     private javax.swing.JCheckBoxMenuItem miGatherReasearchData;
     private javax.swing.JMenuItem miIPGenerator;
+    private javax.swing.JMenuItem miIPValidator;
     private javax.swing.JMenuItem miRefreshResearchState;
     private javax.swing.JMenuItem miResearchConfiguration;
     private javax.swing.JMenuItem miResourceConfiguration;
