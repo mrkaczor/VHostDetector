@@ -23,6 +23,7 @@ import server.m.Console;
 import tools.v.IPGeneratorWindow;
 import tools.v.IPValidatorWindow;
 import utils.Tuple;
+import visualization.c.DataService;
 
 /**
  *
@@ -545,33 +546,8 @@ public class MainWindow extends JFrame {
     private void miGatherReasearchDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miGatherReasearchDataActionPerformed
         // TODO add your handling code here:
         HostsHolder hosts = ResearchService.getInstance().gatherResearchResults();
-        List<Tuple<String, Double, Integer>> avg = new LinkedList<>();
-        
-        for(HostModel host: hosts.getHosts()){
-                int index = -1;
-            for(Tuple<String, Double, Integer> a: avg){
-                if(a.item1.equals(host.getCountryCode())){
-                    index = avg.indexOf(a);
-                    break;
-                }
-            }
-            
-            if(index != -1){
-                for(Tuple<String, Double, Integer> a: avg){
-                    
-                }
-                Tuple<String, Double, Integer> oldTuple = avg.get(index);
-                Tuple<String, Double, Integer> newTuple = new Tuple<>(host.getCountryCode(),
-                        (oldTuple.item2*oldTuple.item3+host.getDiscoveredVHosts().size())/(oldTuple.item3+1),
-                        oldTuple.item3+1);
-                avg.set(index, newTuple);
-            }else{
-                avg.add(new Tuple<>(host.getCountryCode(), 1.*host.getDiscoveredVHosts().size(), 1));
-            }
-        }
-        for(Tuple<String, Double, Integer> a: avg){
-            Server.getInstance().log(Console.MESSAGE, a.item1 + ": " + a.item3 + " => " + a.item2, true);
-        }
+        DataService.getInstance().setData(hosts);
+        DataService.getInstance().showAvgByCountry();
     }//GEN-LAST:event_miGatherReasearchDataActionPerformed
 
     private void miIPGeneratorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miIPGeneratorActionPerformed
