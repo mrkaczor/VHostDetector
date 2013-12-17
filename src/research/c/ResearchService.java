@@ -25,6 +25,7 @@ public class ResearchService {
     private final int _parallelTasks = 10;
     private final int _taskTimeout = 1000;
     private int _initialDataSource;
+    private int _serversCount;
 
     private ResearchData _researchData;
 
@@ -48,7 +49,7 @@ public class ResearchService {
     // <editor-fold defaultstate="collapsed" desc="Object PRIVATE methods">
     private int crateBashScripts() {
         Server srv = Server.getInstance();
-        HostsHolder hosts = HostsService.getInstance().getHostsData();
+        //HostsHolder hosts = HostsService.getInstance().getHostsData();
         String finishScriptFile = ConfigurationService.getInstance().getResourcesConfiguration().getFinishedScriptFile();
         //scripts_dir
         String scriptPath = ConfigurationService.getInstance().getResourcesConfiguration().getResearchPath() + "/" + ConfigurationService.getInstance().getResourcesConfiguration().getScriptsDirectory();
@@ -62,44 +63,69 @@ public class ResearchService {
             srv.executeCommand("chmod +x " + scriptPath + "/" + finishScriptFile, false);
             
             String command, scriptName;
-            int hostsCount = HostsService.getInstance().getHostsData().getServersCount();
+            //int hostsCount = HostsService.getInstance().getHostsData().getServersCount();
+            int hostsCount = _serversCount;
+            System.out.println("Detected " + hostsCount + " servers data...");
             scriptsCount = _parallelTasks;
-            if (_parallelTasks > hostsCount) {
-                scriptsCount = hostsCount;
-                for (int i = 1; i <= scriptsCount; i++) {
-                    command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i - 1).getIPAddress(), _taskTimeout);
-                    scriptName = generateScriptName(i);
-                    srv.executeCommand("echo '" + command + "' > " + scriptPath + "/" + scriptName, false);
-                    srv.executeCommand("chmod +x " + scriptPath + "/" + scriptName, false);
-                }
-            } else {
-                int hostsPerTask = (int) Math.floor(1.0 * hostsCount / _parallelTasks);
-                int hostsInLastTask = hostsCount - (_parallelTasks - 1) * hostsPerTask;
-                for (int i = 0; i < scriptsCount - 1; i++) {
-                    scriptName = generateScriptName(i + 1);
+            
+            //Read hosts
+            String filePath = ConfigurationService.getInstance().getResourcesConfiguration().getHostsListFilePath();
+            try {
+                RandomAccessFile ra = new RandomAccessFile(new File(filePath), "rw");
+                String ipAddress;
+                
+                if (_parallelTasks > hostsCount) {
+                    scriptsCount = hostsCount;
+                    System.out.println("Generating " + scriptsCount + " scripts...");
+                    for (int i = 1; i <= scriptsCount; i++) {
+                        ipAddress = ra.readLine();
+                        //command = HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i-1), _taskTimeout);
+                        command = HostsService.getInstance().generateIPLookupCommand(ipAddress, _taskTimeout);
+                        scriptName = generateScriptName(i);
+                        srv.executeCommand("echo '" + command + "' > " + scriptPath + "/" + scriptName, true);
+                        srv.executeCommand("chmod +x " + scriptPath + "/" + scriptName, false);
+                    }
+                    System.out.println("DONE!");
+                } else {
+                    System.out.println("Generating " + scriptsCount + " scripts...");
+                    int hostsPerTask = (int) Math.floor(1.0 * hostsCount / _parallelTasks);
+                    int hostsInLastTask = hostsCount - (_parallelTasks - 1) * hostsPerTask;
+                    for (int i = 0; i < scriptsCount - 1; i++) {
+                        ipAddress = ra.readLine();
+                        scriptName = generateScriptName(i + 1);
+                        command = "(";
+                        for (int j = 0; j < hostsPerTask; j++) {
+                            //command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i * hostsPerTask + j).getIPAddress(), _taskTimeout);
+                            command += HostsService.getInstance().generateIPLookupCommand(ipAddress, _taskTimeout);
+                            if (j != hostsPerTask - 1) {
+                                command += "; ";
+                            }
+                        }
+                        command += ")";
+                        srv.executeCommand("echo '" + command + "' >> " + scriptPath + "/" + scriptName, true);
+                        srv.executeCommand("chmod +x " + scriptPath + "/" + scriptName, false);
+                    }
+                    //Last task
+                    scriptName = generateScriptName(scriptsCount);
                     command = "(";
-                    for (int j = 0; j < hostsPerTask; j++) {
-                        command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i * hostsPerTask + j).getIPAddress(), _taskTimeout);
-                        if (j != hostsPerTask - 1) {
+                    for (int i = hostsCount - hostsInLastTask + 1; i <= hostsCount; i++) {
+                        ipAddress = ra.readLine();
+                        //command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i - 1).getIPAddress(), _taskTimeout);
+                        command += HostsService.getInstance().generateIPLookupCommand(ipAddress, _taskTimeout);
+                            if (i != hostsCount) {
                             command += "; ";
                         }
                     }
                     command += ")";
-                    srv.executeCommand("echo '" + command + "' >> " + scriptPath + "/" + scriptName, false);
+                    srv.executeCommand("echo '" + command + "' >> " + scriptPath + "/" + scriptName, true);
                     srv.executeCommand("chmod +x " + scriptPath + "/" + scriptName, false);
+                    System.out.println("DONE!");
                 }
-                //Last task
-                scriptName = generateScriptName(scriptsCount);
-                command = "(";
-                for (int i = hostsCount - hostsInLastTask + 1; i <= hostsCount; i++) {
-                    command += HostsService.getInstance().generateIPLookupCommand(hosts.getHosts().get(i - 1).getIPAddress(), _taskTimeout);
-                    if (i != hostsCount) {
-                        command += "; ";
-                    }
-                }
-                command += ")";
-                srv.executeCommand("echo '" + command + "' >> " + scriptPath + "/" + scriptName, false);
-                srv.executeCommand("chmod +x " + scriptPath + "/" + scriptName, false);
+                
+                ra.close();
+            } catch(IOException ex) {
+                Server.getInstance().log(Console.SYSTEM, "Wystąpił błąd podczas próby wczytania danych serwerów: "+ex.getMessage(), true);
+                System.err.println("Wystąpił błąd podczas próby wczytania danych serwerów:\n"+ex.getMessage());
             }
         }
         return scriptsCount;
@@ -189,20 +215,20 @@ public class ResearchService {
             RandomAccessFile ra = new RandomAccessFile(new File(filePath), "rw");
             String line;
             //Obliczanie ilości adresów IP
-            int count = 0;
+            _serversCount = 0;
             while (ra.readLine() != null) {
-                count++;
+                _serversCount++;
             }
             ra.seek(0);
             //
-            String command = "echo " + count + " > " + path;
+            String command = "echo " + _serversCount + " > " + path;
             if (Server.getInstance().executeCommand(command, true)) {
                 
                 while ((line = ra.readLine()) != null) {
                     command = "echo " + line + " >> " + path;
                     Server.getInstance().executeCommand(command, false);
                 }
-                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+count+" serwerów!", false);
+                Server.getInstance().log(Console.SYSTEM, "Pomyślnie wczytano dane "+_serversCount+" serwerów!", false);
             }
             ra.close();
         } catch(IOException ex) {
