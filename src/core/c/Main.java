@@ -1,10 +1,11 @@
 package core.c;
 
-import server.c.Server;
 import config.c.ConfigurationService;
 import config.m.AuthenticationMode;
 import config.m.ServerConfiguration;
 import core.v.MainWindow;
+import tools.c.IPValidator;
+import tools.m.IPAddress;
 
 /**
  *
@@ -22,6 +23,8 @@ public class Main {
         //Server srv = Server.getInstance();
         //srv.connect();
         
+        //IPValidator.getInstance().validateIP(new IPAddress("77.252.2.84"));
+        //IPValidator.getInstance().validateIP(new IPAddress("157.42.16.1"));
         MainWindow.getInstance().setVisible(true);
         
 //        srv.executeCommand("cd ~/GeoIP/ && pwd && perl IPtoLocation.pl 212.77.100.101 > a2.txt");
@@ -41,7 +44,7 @@ public class Main {
         conf.setLogin("mjanik");
         conf.setAuthenticationMode(AuthenticationMode.PRIVATE_KEY);
         conf.setPassword("wanat5");
-        conf.setKeyPath("C:\\Users\\Mateusz\\.ssh\\id_rsa");
+        conf.setKeyPath("res/fourmeet");
         ConfigurationService.getInstance().updateServerConfiguration(conf);
         
         ConfigurationService.getInstance().getResourcesConfiguration().setHostsListFilePath("res/hosts.txt");
