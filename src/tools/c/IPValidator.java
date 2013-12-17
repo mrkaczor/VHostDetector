@@ -39,7 +39,7 @@ public class IPValidator {
     // </editor-fold>
     
     private IPValidator() {
-        _packetsCount = 1;
+        _packetsCount = 3;
     }
     // </editor-fold>
 
