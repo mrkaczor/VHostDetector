@@ -25,7 +25,7 @@ import utils.Utils;
  */
 public class IPGenerator {
 
-    public final String BUFFER_FILE = "data";
+    public final String BUFFER_FILE = Utils.generateTimestamp()+".tmp";
 
     private List<IPRange> _ranges;
     private List<IPAddress> _addresses;
